@@ -208,7 +208,56 @@ class GameScreenState extends State<GameScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            const Text('關聯_臺灣版'),
+            InkWell(child: const Text('關聯－臺灣版'), onTap: () {
+              // open a dialog
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: const Text('關於關連－臺灣版'),
+                    content:  SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                              '每局共有4組關聯字，每組關聯字包含四個畫面上出現的字。例如：玫瑰、薔薇、月季、康乃馨都與花有關連。'),
+                          const SizedBox(height: 8),
+                          const Text('難度與顏色對應：'),
+                          // show color and difficulty name
+                          for (var difficultyTuple in [
+                            (Difficulty.easy, '容易'),
+                            (Difficulty.normal, '中等'),
+                            (Difficulty.hard, '困難'),
+                            (Difficulty.expert, '專家'),
+
+                          ])
+                            Row(
+                              children: [
+                                Container(
+                                  width: 16,
+                                  height: 16,
+                                  color: difficultyColorMap[difficultyTuple.$1],
+                                ),
+                                const SizedBox(width: 8),
+                                Text(difficultyTuple.$2),
+                              ],
+                            ),
+                          
+                        ],
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('關閉'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },),
             const SizedBox(width: 8),
             // a date picker to select date
             OutlinedButton(
@@ -288,7 +337,7 @@ class GameScreenState extends State<GameScreen> {
                   },
                 );
               },
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(Icons.restart_alt),
             ),
         ],
       ),
