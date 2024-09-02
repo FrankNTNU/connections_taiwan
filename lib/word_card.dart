@@ -26,7 +26,7 @@ class WordCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               color: isSelected ? Colors.grey.shade700 : Colors.grey.shade200,
             ),
-            width: constraints.maxWidth / 4.5,
+            width: constraints.maxWidth / Constants.wordCardWidthDevisionFactor,
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
             child: FittedBox(
               fit: BoxFit.scaleDown,

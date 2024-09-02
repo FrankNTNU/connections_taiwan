@@ -43,7 +43,6 @@ class WordModel {
 
   // fromJson
   factory WordModel.fromJson(Map<String, dynamic> json) {
-    print('json: $json');
     return WordModel(
       word: json['word'],
       difficulty: Difficulty.values.firstWhere(
@@ -54,14 +53,23 @@ class WordModel {
     );
   }
 
-  static Future<(List<WordModel>, Map<Difficulty, String>)> loadData(
+  static Future<(List<WordModel>, Map<Difficulty, String>)?> loadData(
       DateTime? dateTime) async {
-    // date in yyyy_mm_dd format
+    // date in yyyy-mm-dd format
     final String dateString = (dateTime ?? DateTime.now())
         .toString()
-        .split(' ')[0]
-        .replaceAll('-', '_');
+        .split(' ')[0];
     print('dateString: $dateString');
+    final fileName = 'assets/json/data_$dateString.json';
+    // check if file exists
+    final bool fileExists = await rootBundle.loadString(fileName).then((_) {
+      return true;
+    }).catchError((_) {
+      return false;
+    });
+    if (!fileExists) {
+      return null;
+    }
     String jsonString =
         await rootBundle.loadString('assets/json/data_$dateString.json');
     Map<String, dynamic> jsonData = jsonDecode(jsonString);

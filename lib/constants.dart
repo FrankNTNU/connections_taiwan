@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 class Constants {
   static const double wordCardHeight = 90;
   static const double cardHorizontalSpacing = 8;
+  static const double wordCardWidthDevisionFactor = 4.5;
 }
 
 enum Difficulty { easy, normal, hard, expert }
