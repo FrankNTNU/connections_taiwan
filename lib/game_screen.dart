@@ -5,7 +5,7 @@ import 'package:connections_taiwan/word_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:confetti/confetti.dart';
 import 'snackbar_utils.dart';
 import 'word_model.dart';
 
@@ -22,12 +22,14 @@ class GameScreenState extends State<GameScreen> {
   List<Difficulty> difficulitiesSolved = [];
   List<DateTime> availableDates = [];
   DateTime? selectedDate;
+  final confettiController =
+      ConfettiController(duration: const Duration(seconds: 10));
+
   @override
   void initState() {
     super.initState();
     getAllFileDates();
-    final tomorrow = DateTime.now().add(const Duration(days: 1));
-    WordModel.loadData(tomorrow).then((value) {
+    WordModel.loadData(DateTime.now()).then((value) {
       if (value == null) {
         return;
       }
@@ -115,11 +117,13 @@ class GameScreenState extends State<GameScreen> {
       deSelectAll();
       // save words to Shared Preferences
       saveWordsToSharedPreferences();
-      showSnackBar(context, '正確！找到四個有關連性的字。');
+      showSnackBar(context, '正確！', isError: false);
     }
     bool isAllCompleted = words.where((e) => !e.isCompleted).isEmpty;
     if (isAllCompleted) {
-      showSnackBar(context, '恭喜！找到所有有關連性的字。');
+      showSnackBar(context, '恭喜！找到所有有關連性的字。', isError: false);
+      // confetti
+      confettiController.play();
     }
   }
 
@@ -207,48 +211,51 @@ class GameScreenState extends State<GameScreen> {
             const Text('關聯_臺灣版'),
             const SizedBox(width: 8),
             // a date picker to select date
-            OutlinedButton(onPressed: () {
-              showDatePicker(
-                context: context,
-                initialDate: selectedDate ?? DateTime.now(),
-                firstDate: availableDates.first,
-                lastDate: availableDates.last,
-                
-                // show only available dates
-                selectableDayPredicate: (DateTime date) {
-                  return availableDates.contains(date);
-                },
-                // show 選擇日期 button
-                cancelText: '取消',
-                confirmText: '選擇日期',
-                // change 'SELECT DATE' to '選擇日期'
-                helpText: '選擇日期',
-                // make help text larger
-                
-              ).then((value) {
-                if (value != null) {
-                  setState(() {
-                    selectedDate = value;
-                  });
-                  WordModel.loadData(value).then((value) {
-                    if (value == null) {
-                      return;
+            OutlinedButton(
+                onPressed: () {
+                  showDatePicker(
+                    context: context,
+                    initialDate: selectedDate ?? DateTime.now(),
+                    firstDate: availableDates.first,
+                    lastDate: availableDates.last,
+
+                    // show only available dates
+                    selectableDayPredicate: (DateTime date) {
+                      return availableDates.contains(date);
+                    },
+                    // show 選擇日期 button
+                    cancelText: '取消',
+                    confirmText: '選擇日期',
+                    // change 'SELECT DATE' to '選擇日期'
+                    helpText: '選擇日期',
+                  ).then((value) {
+                    if (value != null) {
+                      setState(() {
+                        selectedDate = value;
+                      });
+                      WordModel.loadData(value).then((value) {
+                        if (value == null) {
+                          return;
+                        }
+                        setState(() {
+                          words = value.$1;
+                          words.shuffle();
+                          difficultyDescriptionMap = value.$2;
+                          difficulitiesSolved = [];
+                        });
+                        saveWordsToSharedPreferences();
+                        // stop confetti
+                        confettiController.stop();
+                      });
                     }
-                    setState(() {
-                      words = value.$1;
-                      words.shuffle();
-                      difficultyDescriptionMap = value.$2;
-                    });
-                    saveWordsToSharedPreferences();
                   });
-                }
-              });
-            }, child: Text(
-              selectedDate == null
-                  ? '選擇日期'
-                  : '${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}',
-                style: const TextStyle(fontSize: 16, color: Colors.white),
-            )),
+                },
+                child: Text(
+                  selectedDate == null
+                      ? '選擇日期'
+                      : '${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}',
+                  style: const TextStyle(fontSize: 16, color: Colors.white),
+                )),
           ],
         ),
         actions: [
@@ -287,154 +294,175 @@ class GameScreenState extends State<GameScreen> {
       ),
       body: words.isEmpty
           ? const Center(child: Text('還沒有資料，請稍後再試。'))
-          : SingleChildScrollView(
-              child: Center(
-                child: Container(
-                  constraints:
-                      const BoxConstraints(maxWidth: 800, minWidth: 400),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 16),
-                      // Title
-                      Text(
-                        isAllCompleted ? '恭喜你找到所有關聯!' : '選擇四個有關連性的字按下提交',
-                        style: const TextStyle(fontSize: 25),
-                      ),
-                      const SizedBox(height: 16),
-                      // Completed words
-                      if (words.where((e) => e.isCompleted).isNotEmpty)
-                        Wrap(
-                          runSpacing: 8,
-                          children: [
-                            for (var difficulty in difficulitiesSolved)
-                              if (words
-                                  .where((e) =>
-                                      e.difficulty == difficulty &&
-                                      e.isCompleted)
-                                  .isNotEmpty)
-                                Column(
-                                  children: [
-                                    LayoutBuilder(
-                                      builder: (context, constraints) =>
-                                          Container(
-                                        height: Constants.wordCardHeight,
-                                        alignment: Alignment.center,
-                                        width: (constraints.maxWidth /
-                                                    Constants
-                                                        .wordCardWidthDevisionFactor) *
-                                                4 +
-                                            Constants.cardHorizontalSpacing * 3,
-                                        decoration: BoxDecoration(
-                                          color: difficultyColorMap[difficulty],
-                                          borderRadius:
-                                              BorderRadius.circular(16),
-                                        ),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              difficultyDescriptionMap[
-                                                  difficulty]!,
-                                              style: const TextStyle(
-                                                fontSize: 25,
-                                                color: Colors.black,
-                                              ),
-                                            ),
-                                            FittedBox(
-                                              fit: BoxFit.scaleDown,
-                                              child: Text(
-                                                words
-                                                    .where((e) =>
-                                                        e.difficulty ==
-                                                            difficulty &&
-                                                        e.isCompleted)
-                                                    .map((e) => e.word)
-                                                    .join('、'),
-                                                style: const TextStyle(
-                                                  fontSize: 25,
-                                                  color: Colors.black,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                          ],
-                        ),
-                      const SizedBox(height: 8),
-                      // Uncompleted words
-                      SizedBox(
-                        width: double.infinity,
-                        child: Wrap(
-                          spacing: Constants
-                              .cardHorizontalSpacing, // Spacing between items
-                          runSpacing: 8, // Spacing between lines
-                          alignment:
-                              WrapAlignment.center, // Center items horizontally
-                          children: [
-                            for (var word in words.where((e) => !e.isCompleted))
-                              WordCard(
-                                word: word.word,
-                                isSelected: word.isSelected,
-                                onTap: () => wordCardOnTap(word.word),
-                              )
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      // Button group
-                      Wrap(
-                        spacing: 8,
-                        alignment: WrapAlignment.center,
+          : Stack(
+              children: [
+                SingleChildScrollView(
+                  child: Center(
+                    child: Container(
+                      constraints:
+                          const BoxConstraints(maxWidth: 800, minWidth: 400),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          if (isAllCompleted)
-                            OutlinedButton(
-                              onPressed: resetCompletedAndSelected,
-                              child: const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Text('重新開始',
-                                    style: TextStyle(fontSize: 16)),
-                              ),
+                          const SizedBox(height: 16),
+                          // Title
+                          Text(
+                            isAllCompleted ? '恭喜你找到所有關聯!' : '選擇四個有關連性的字按下提交',
+                            style: const TextStyle(fontSize: 25),
+                          ),
+                          const SizedBox(height: 16),
+                          // Completed words
+                          if (words.where((e) => e.isCompleted).isNotEmpty)
+                            Wrap(
+                              runSpacing: 8,
+                              children: [
+                                for (var difficulty in difficulitiesSolved)
+                                  if (words
+                                      .where((e) =>
+                                          e.difficulty == difficulty &&
+                                          e.isCompleted)
+                                      .isNotEmpty)
+                                    Column(
+                                      children: [
+                                        LayoutBuilder(
+                                          builder: (context, constraints) =>
+                                              Container(
+                                            height: Constants.wordCardHeight,
+                                            alignment: Alignment.center,
+                                            width: (constraints.maxWidth /
+                                                        Constants
+                                                            .wordCardWidthDevisionFactor) *
+                                                    4 +
+                                                Constants
+                                                        .cardHorizontalSpacing *
+                                                    3,
+                                            decoration: BoxDecoration(
+                                              color: difficultyColorMap[
+                                                  difficulty],
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                            ),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  difficultyDescriptionMap[
+                                                      difficulty]!,
+                                                  style: const TextStyle(
+                                                    fontSize: 25,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                                FittedBox(
+                                                  fit: BoxFit.scaleDown,
+                                                  child: Text(
+                                                    words
+                                                        .where((e) =>
+                                                            e.difficulty ==
+                                                                difficulty &&
+                                                            e.isCompleted)
+                                                        .map((e) => e.word)
+                                                        .join('、'),
+                                                    style: const TextStyle(
+                                                      fontSize: 25,
+                                                      color: Colors.black,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                              ],
                             ),
-                          if (!isAllCompleted)
-                            OutlinedButton(
-                              onPressed: deSelectAll,
-                              child: const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Text('清除選擇',
-                                    style: TextStyle(fontSize: 16)),
-                              ),
+                          const SizedBox(height: 8),
+                          // Uncompleted words
+                          SizedBox(
+                            width: double.infinity,
+                            child: Wrap(
+                              spacing: Constants
+                                  .cardHorizontalSpacing, // Spacing between items
+                              runSpacing: 8, // Spacing between lines
+                              alignment: WrapAlignment
+                                  .center, // Center items horizontally
+                              children: [
+                                for (var word
+                                    in words.where((e) => !e.isCompleted))
+                                  WordCard(
+                                    word: word.word,
+                                    isSelected: word.isSelected,
+                                    onTap: () => wordCardOnTap(word.word),
+                                  )
+                              ],
                             ),
-                          if (!isAllCompleted)
-                            OutlinedButton(
-                              onPressed: shuffleWords,
-                              child: const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child:
-                                    Text('洗牌', style: TextStyle(fontSize: 16)),
-                              ),
-                            ),
-                          if (!isAllCompleted)
-                            ElevatedButton(
-                              onPressed: checkAnswers,
-                              child: const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child:
-                                    Text('提交', style: TextStyle(fontSize: 16)),
-                              ),
-                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // Button group
+                          Wrap(
+                            spacing: 8,
+                            alignment: WrapAlignment.center,
+                            children: [
+                              if (isAllCompleted)
+                                OutlinedButton(
+                                  onPressed: resetCompletedAndSelected,
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text('重新開始',
+                                        style: TextStyle(fontSize: 16)),
+                                  ),
+                                ),
+                              if (!isAllCompleted)
+                                OutlinedButton(
+                                  onPressed: deSelectAll,
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text('清除選擇',
+                                        style: TextStyle(fontSize: 16)),
+                                  ),
+                                ),
+                              if (!isAllCompleted)
+                                OutlinedButton(
+                                  onPressed: shuffleWords,
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text('洗牌',
+                                        style: TextStyle(fontSize: 16)),
+                                  ),
+                                ),
+                              if (!isAllCompleted)
+                                ElevatedButton(
+                                  onPressed: checkAnswers,
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text('提交',
+                                        style: TextStyle(fontSize: 16)),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
                         ],
                       ),
-                      const SizedBox(height: 16),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+                Center(
+                  child: ConfettiWidget(
+                    confettiController: confettiController,
+                    blastDirectionality: BlastDirectionality.explosive,
+                    shouldLoop: false,
+                    numberOfParticles: 20,
+                    gravity: 0.1,
+                    emissionFrequency: 0.05,
+                    maxBlastForce: 20,
+                    minBlastForce: 8,
+                    colors: const [Colors.blue, Colors.red, Colors.yellow],
+                  ),
+                ),
+              ],
             ),
     );
   }
