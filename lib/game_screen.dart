@@ -5,21 +5,8 @@ import 'package:connections_taiwan/word_card.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'snackbar_utils.dart';
 import 'word_model.dart';
-
-enum Difficulty { easy, normal, hard, expert }
-
-// difficulty and color map
-Map<Difficulty, Color> difficultyColorMap = {
-  // ##f9df6d
-  Difficulty.easy: const Color(0xfff9df6d),
-  // #a0c35a
-  Difficulty.normal: const Color(0xffa0c35a),
-  // #b0c4ef
-  Difficulty.hard: const Color(0xffb0c4ef),
-  // ba81c5
-  Difficulty.expert: const Color(0xffba81c5),
-};
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -51,15 +38,7 @@ class GameScreenState extends State<GameScreen> {
     bool isMaxSelected =
         words.where((e) => e.isSelected).length == 4 && !isCurrentSelected;
     if (isMaxSelected) {
-      SnackBar snackBar = const SnackBar(
-        content: Text('已經選擇了四個字，請取消選擇後再選擇新的字。'),
-        duration: Duration(seconds: 5),
-      );
-      // hide snackbar if there is already a snackbar
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        snackBar,
-      );
+      showSnackBar(context, '已經選擇了四個字，請取消選擇後再選擇新的字。');
       return;
     }
     setState(() {
@@ -77,28 +56,12 @@ class GameScreenState extends State<GameScreen> {
   void checkAnswers() {
     bool isNoneSelected = words.where((e) => e.isSelected).isEmpty;
     if (isNoneSelected) {
-      SnackBar snackBar = const SnackBar(
-        content: Text('請選擇字後再提交。'),
-        duration: Duration(seconds: 5),
-      );
-      // hide snackbar if there is already a snackbar
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        snackBar,
-      );
+      showSnackBar(context, '請選擇字後再提交。');
       return;
     }
     bool isSelectedWordsNotFour = words.where((e) => e.isSelected).length != 4;
     if (isSelectedWordsNotFour) {
-      SnackBar snackBar = const SnackBar(
-        content: Text('請選擇四個字後再提交。'),
-        duration: Duration(seconds: 5),
-      );
-      // hide snackbar if there is already a snackbar
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        snackBar,
-      );
+      showSnackBar(context, '請選擇四個字後再提交。');
       return;
     }
     bool currentlySelectedWordsSameDifficulty = words
@@ -108,15 +71,7 @@ class GameScreenState extends State<GameScreen> {
             .length ==
         1;
     if (!currentlySelectedWordsSameDifficulty) {
-      SnackBar snackBar = const SnackBar(
-        content: Text('不正確。請選擇四個有關聯的字。'),
-        duration: Duration(seconds: 5),
-      );
-      // hide snackbar if there is already a snackbar
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        snackBar,
-      );
+      showSnackBar(context, '不正確。請選擇四個有關聯的字。');
       return;
     }
     if (currentlySelectedWordsSameDifficulty) {
@@ -136,27 +91,11 @@ class GameScreenState extends State<GameScreen> {
       deSelectAll();
       // save words to Shared Preferences
       saveWordsToSharedPreferences();
-      SnackBar snackBar = const SnackBar(
-        content: Text('恭喜！找到四組有關連性的字。'),
-        duration: Duration(seconds: 5),
-      );
-      // hide snackbar if there is already a snackbar
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        snackBar,
-      );
+      showSnackBar(context, '正確！找到四個有關連性的字。');
     }
     bool isAllCompleted = words.where((e) => !e.isCompleted).isEmpty;
     if (isAllCompleted) {
-      SnackBar snackBar = const SnackBar(
-        content: Text('恭喜！找到所有有關連性的字。'),
-        duration: Duration(seconds: 5),
-      );
-      // hide snackbar if there is already a snackbar
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        snackBar,
-      );
+      showSnackBar(context, '恭喜！找到所有有關連性的字。');
     }
   }
 

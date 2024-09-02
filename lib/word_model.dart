@@ -1,7 +1,8 @@
 import 'dart:convert';
 
-import 'package:connections_taiwan/game_screen.dart';
 import 'package:flutter/services.dart';
+
+import 'constants.dart';
 
 class WordModel {
   final String word;
