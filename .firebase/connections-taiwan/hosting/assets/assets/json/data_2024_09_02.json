@@ -1,0 +1,75 @@
+{
+    "difficultyDescriptions": {
+      "easy": "形狀是圓環",
+      "normal": "地震求生用品",
+      "hard": "臺灣人最喜歡去的國家",
+      "expert": "辦公用品的諧音"
+    },
+    "words": [
+      {
+        "word": "輪胎",
+        "difficulty": "easy"
+      },
+      {
+        "word": "波堤",
+        "difficulty": "easy"
+      },
+      {
+        "word": "救生圈",
+        "difficulty": "easy"
+      },
+      {
+        "word": "手環",
+        "difficulty": "easy"
+      },
+      {
+        "word": "水",
+        "difficulty": "normal"
+      },
+      {
+        "word": "手電筒",
+        "difficulty": "normal"
+      },
+      {
+        "word": "罐頭",
+        "difficulty": "normal"
+      },
+      {
+        "word": "營養口糧",
+        "difficulty": "normal"
+      },
+      {
+        "word": "韓國",
+        "difficulty": "hard"
+      },
+      {
+        "word": "香港",
+        "difficulty": "hard"
+      },
+      {
+        "word": "大陸",
+        "difficulty": "hard"
+      },
+      {
+        "word": "日本",
+        "difficulty": "hard"
+      },
+      {
+        "word": "印尼",
+        "difficulty": "expert"
+      },
+      {
+        "word": "澆水",
+        "difficulty": "expert"
+      },
+      {
+        "word": "齒",
+        "difficulty": "expert"
+      },
+      {
+        "word": "交代",
+        "difficulty": "expert"
+      }
+    ]
+  }
+  

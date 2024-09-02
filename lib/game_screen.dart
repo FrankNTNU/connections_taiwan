@@ -31,6 +31,7 @@ class GameScreen extends StatefulWidget {
 class GameScreenState extends State<GameScreen> {
   List<WordModel> words = [];
   Map<Difficulty, String> difficultyDescriptionMap = {};
+  List<Difficulty> difficulitiesSolved = [];
   @override
   void initState() {
     super.initState();
@@ -127,6 +128,11 @@ class GameScreenState extends State<GameScreen> {
           return e;
         }).toList();
       });
+      setState(() {
+        difficulitiesSolved.add(
+          words.firstWhere((e) => e.isSelected).difficulty,
+        );
+      });
       deSelectAll();
       // save words to Shared Preferences
       saveWordsToSharedPreferences();
@@ -182,11 +188,12 @@ class GameScreenState extends State<GameScreen> {
     });
   }
 
-  void reSetCompletedAndSelected() {
+  void resetCompletedAndSelected() {
     setState(() {
       words = words.map((e) {
         return e.copyWith(isSelected: false, isCompleted: false);
       }).toList();
+      difficulitiesSolved = [];
     });
     saveWordsToSharedPreferences();
   }
@@ -196,6 +203,11 @@ class GameScreenState extends State<GameScreen> {
       prefs.setStringList(
         'words',
         words.map((e) => json.encode(e.toJson())).toList(),
+      );
+      // save difficulitiesSolved to Shared Preferences
+      prefs.setStringList(
+        'difficulitiesSolved',
+        difficulitiesSolved.map((e) => e.name).toList(),
       );
     });
   }
@@ -209,6 +221,15 @@ class GameScreenState extends State<GameScreen> {
               wordsJson.map((e) => WordModel.fromJson(json.decode(e))).toList();
         });
       }
+      final List<String>? difficulitiesSolvedJson =
+          prefs.getStringList('difficulitiesSolved');
+      if (difficulitiesSolvedJson != null) {
+        setState(() {
+          difficulitiesSolved = difficulitiesSolvedJson
+              .map((e) => Difficulty.values.firstWhere((element) => element.name == e))
+              .toList();
+        });
+      }
     });
   }
 
@@ -218,6 +239,38 @@ class GameScreenState extends State<GameScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('關聯_臺灣版'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              // confirm if reset
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: const Text('確定要重新開始嗎？'),
+                    content: const Text('所有已選擇的字將會被清除。'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('取消'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          resetCompletedAndSelected();
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('確定'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -238,7 +291,7 @@ class GameScreenState extends State<GameScreen> {
                   Wrap(
                     runSpacing: 8,
                     children: [
-                      for (var difficulty in Difficulty.values)
+                      for (var difficulty in difficulitiesSolved)
                         if (words
                             .where((e) =>
                                 e.difficulty == difficulty && e.isCompleted)
@@ -316,7 +369,7 @@ class GameScreenState extends State<GameScreen> {
                   children: [
                     if (isAllCompleted)
                       OutlinedButton(
-                        onPressed: reSetCompletedAndSelected,
+                        onPressed: resetCompletedAndSelected,
                         child: const Padding(
                           padding: EdgeInsets.all(8.0),
                           child: Text('重新開始', style: TextStyle(fontSize: 16)),
