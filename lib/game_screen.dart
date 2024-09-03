@@ -191,6 +191,15 @@ class GameScreenState extends State<GameScreen> {
         'words',
         words.map((e) => json.encode(e.toJson())).toList(),
       );
+      // save difficultyMap to Shared Preferences
+      Map<String, String> encodedDifficultyDescriptionMap = {
+      for (var entry in difficultyDescriptionMap.entries)
+        entry.key.name: entry.value
+    };
+      prefs.setString(
+        'difficultyDescriptionMap',
+        json.encode(encodedDifficultyDescriptionMap),
+      );
       // save difficulitiesSolved to Shared Preferences
       prefs.setStringList(
         'difficulitiesSolved',
@@ -211,6 +220,16 @@ class GameScreenState extends State<GameScreen> {
         setState(() {
           words =
               wordsJson.map((e) => WordModel.fromJson(json.decode(e))).toList();
+        });
+      }
+      final String? difficultyDescriptionMapJson =
+          prefs.getString('difficultyDescriptionMap');
+      print('difficultyDescriptionMapJson: $difficultyDescriptionMapJson');
+      if (difficultyDescriptionMapJson != null) {
+        setState(() {
+          difficultyDescriptionMap = (json.decode(difficultyDescriptionMapJson) as Map<String, dynamic>)
+              .map((key, value) =>
+                  MapEntry(Difficulty.values.firstWhere((element) => element.name == key), value));
         });
       }
       final List<String>? difficulitiesSolvedJson =
