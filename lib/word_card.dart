@@ -14,31 +14,34 @@ class WordCard extends StatelessWidget {
       this.onTap});
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: LayoutBuilder(builder: (context, constraints) {
-          return Container(
-            height: Constants.wordCardHeight,
-            decoration: BoxDecoration(
+    return Container(
+       decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               color: isSelected ? Colors.grey.shade700 : Colors.grey.shade200,
             ),
-            width: constraints.maxWidth / Constants.wordCardWidthDevisionFactor,
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                word,
-                style: TextStyle(
-                    fontSize: fontSize,
-                    color: isSelected ? Colors.white : Colors.black),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: LayoutBuilder(builder: (context, constraints) {
+            return Container(
+              height: Constants.wordCardHeight,
+             
+              width: constraints.maxWidth / Constants.wordCardWidthDevisionFactor,
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  word,
+                  style: TextStyle(
+                      fontSize: fontSize,
+                      color: isSelected ? Colors.white : Colors.black),
+                ),
               ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
     );
   }

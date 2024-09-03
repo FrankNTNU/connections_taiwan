@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:confetti/confetti.dart';
 import 'package:connections_taiwan/constants.dart';
+import 'package:connections_taiwan/google_signin_button.dart';
 import 'package:connections_taiwan/word_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,8 +28,9 @@ class GameScreenState extends State<GameScreen> {
   List<Difficulty> difficulitiesSolved = [];
   List<DateTime> availableDates = [];
   DateTime? selectedDate;
+  String? customLevel;
   final confettiController =
-      ConfettiController(duration: const Duration(seconds: 10));
+      ConfettiController(duration: const Duration(seconds: 30));
 
   @override
   void initState() {
@@ -133,6 +135,7 @@ class GameScreenState extends State<GameScreen> {
       showSnackBar(context, '恭喜！您找到所有關聯組合！', isError: false);
       // confetti
       confettiController.play();
+      openLeaderboardOptInDialog();
     }
   }
 
@@ -176,6 +179,7 @@ class GameScreenState extends State<GameScreen> {
   }
 
   void resetCompletedAndSelected() {
+    confettiController.stop();
     setState(() {
       words = words.map((e) {
         return e.copyWith(isSelected: false, isCompleted: false);
@@ -193,9 +197,9 @@ class GameScreenState extends State<GameScreen> {
       );
       // save difficultyMap to Shared Preferences
       Map<String, String> encodedDifficultyDescriptionMap = {
-      for (var entry in difficultyDescriptionMap.entries)
-        entry.key.name: entry.value
-    };
+        for (var entry in difficultyDescriptionMap.entries)
+          entry.key.name: entry.value
+      };
       prefs.setString(
         'difficultyDescriptionMap',
         json.encode(encodedDifficultyDescriptionMap),
@@ -227,9 +231,12 @@ class GameScreenState extends State<GameScreen> {
       print('difficultyDescriptionMapJson: $difficultyDescriptionMapJson');
       if (difficultyDescriptionMapJson != null) {
         setState(() {
-          difficultyDescriptionMap = (json.decode(difficultyDescriptionMapJson) as Map<String, dynamic>)
-              .map((key, value) =>
-                  MapEntry(Difficulty.values.firstWhere((element) => element.name == key), value));
+          difficultyDescriptionMap = (json.decode(difficultyDescriptionMapJson)
+                  as Map<String, dynamic>)
+              .map((key, value) => MapEntry(
+                  Difficulty.values
+                      .firstWhere((element) => element.name == key),
+                  value));
         });
       }
       final List<String>? difficulitiesSolvedJson =
@@ -248,6 +255,25 @@ class GameScreenState extends State<GameScreen> {
           selectedDate = DateTime.parse(selectedDateJson);
         });
       }
+    });
+  }
+
+  void changeSelectedDate(DateTime date) {
+    confettiController.stop();
+    setState(() {
+      selectedDate = date;
+    });
+    WordModel.loadData(date).then((value) {
+      if (value == null) {
+        return;
+      }
+      setState(() {
+        words = value.$1;
+        words.shuffle();
+        difficultyDescriptionMap = value.$2;
+        difficulitiesSolved = [];
+      });
+      saveWordsToSharedPreferences();
     });
   }
 
@@ -315,32 +341,17 @@ class GameScreenState extends State<GameScreen> {
                   // change 'SELECT DATE' to '選擇日期'
                   helpText: '選擇日期',
                 ).then((value) {
-                  if (value != null) {
-                    setState(() {
-                      selectedDate = value;
-                    });
-                    WordModel.loadData(value).then((value) {
-                      if (value == null) {
-                        return;
-                      }
-                      setState(() {
-                        words = value.$1;
-                        words.shuffle();
-                        difficultyDescriptionMap = value.$2;
-                        difficulitiesSolved = [];
-                      });
-                      saveWordsToSharedPreferences();
-                      // stop confetti
-                      confettiController.stop();
-                    });
+                  print('value: $value');
+                  if (value == null) {
+                    return;
                   }
+                  changeSelectedDate(value);
                 });
               },
               child: Text(
                 selectedDate == null
                     ? '選擇日期'
                     : '${selectedDate!.year}/${selectedDate!.month.toString().padLeft(2, '0')}/${selectedDate!.day.toString().padLeft(2, '0')}',
-                style: const TextStyle(fontSize: 16, color: Colors.black),
               ),
             ),
           ],
@@ -359,6 +370,7 @@ class GameScreenState extends State<GameScreen> {
                     return SingleChildScrollView(
                       child: Center(
                         child: Container(
+                          height: constraints.maxHeight,
                           width: double.infinity,
                           constraints: const BoxConstraints(maxWidth: 800),
                           padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -368,7 +380,9 @@ class GameScreenState extends State<GameScreen> {
                               const SizedBox(height: 16),
                               // Title
                               Text(
-                                isAllCompleted ? '恭喜您找到所有關聯！' : '選擇四個有關連性的字按下提交',
+                                isAllCompleted
+                                    ? '恭喜您找到所有關聯！'
+                                    : '選擇四個有關連性的字按下提交',
                                 style: const TextStyle(fontSize: 25),
                               ),
                               const SizedBox(height: 16),
@@ -438,12 +452,20 @@ class GameScreenState extends State<GameScreen> {
                                       onPressed: checkAnswers,
                                       child: const Padding(
                                         padding: EdgeInsets.all(8.0),
-                                        child: Text('提交',
-                                            style: TextStyle(fontSize: 16)),
+                                        child: Text(
+                                          '提交',
+                                          style: TextStyle(fontSize: 16),
+                                        ),
                                       ),
                                     ),
-                                  if (isAllCompleted)
+                                  if (isAllCompleted && false)
                                     ElevatedButton(
+                                      // amber
+                                      style: ButtonStyle(
+                                        backgroundColor:
+                                            WidgetStateProperty.all(
+                                                Colors.amber),
+                                      ),
                                       onPressed: openLeaderboardOptInDialog,
                                       child: const Padding(
                                         padding: EdgeInsets.all(8.0),
@@ -451,6 +473,7 @@ class GameScreenState extends State<GameScreen> {
                                             style: TextStyle(fontSize: 16)),
                                       ),
                                     ),
+                                  //const GoogleSigninButton()
                                 ],
                               ),
                               const SizedBox(
