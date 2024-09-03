@@ -239,11 +239,37 @@ class GameScreenState extends State<GameScreen> {
     bool isAllCompleted = words.where((e) => !e.isCompleted).isEmpty;
     return Scaffold(
       appBar: AppBar(
+        leading: // logo
+            InkWell(
+              onTap: () {  // open a dialog
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text('關於關連－臺灣版'),
+                      content: const AboutContent(),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text('關閉'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Image.asset('assets/icon/connections.webp'),
+                      ),
+            ),
         title: Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             InkWell(
-              child: const Text('關聯－臺灣版'),
+              child: const Text('關連－臺灣版'),
               onTap: () {
                 // open a dialog
                 showDialog(
@@ -315,44 +341,12 @@ class GameScreenState extends State<GameScreen> {
                 ),
               ),
             ),
-            // leaderboard icon button
-            LeaderboardIconButton(selectedDate: selectedDate),
           ],
         ),
-        actions: [
-          if (words.isNotEmpty)
-            IconButton(
-              onPressed: () {
-                // confirm if reset
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: const Text('確定要重新開始嗎？'),
-                      content: const Text('所有已選擇的字將會被清除。'),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text('取消'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            resetCompletedAndSelected();
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text('確定'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-              icon: const Icon(Icons.restart_alt),
-            ),
-        ],
+        actions: [   // leaderboard icon button
+                              LeaderboardIconButton(selectedDate: selectedDate),],
       ),
+      
       body: words.isEmpty
           ? const Center(child: Text('還沒有資料，請稍後再試。'))
           : Stack(
@@ -444,6 +438,7 @@ class GameScreenState extends State<GameScreen> {
                                 ),
                             ],
                           ),
+                          
                           const SizedBox(
                             height: 8,
                           ),
