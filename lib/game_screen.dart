@@ -130,11 +130,10 @@ class GameScreenState extends State<GameScreen> {
     }
     bool isAllCompleted = words.where((e) => !e.isCompleted).isEmpty;
     if (isAllCompleted) {
-      showSnackBar(context, '恭喜！找到所有有關連性的字。', isError: false);
+      showSnackBar(context, '恭喜！您找到所有關聯組合！', isError: false);
       // confetti
       confettiController.play();
-      // show a dialog asking for username to add to leaderboard or opt out
-      openLeaderboardOptInDialog();
+     
     }
   }
 
@@ -241,65 +240,51 @@ class GameScreenState extends State<GameScreen> {
       appBar: AppBar(
         leading: // logo
             InkWell(
-              onTap: () {  // open a dialog
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: const Text('關於關連－臺灣版'),
-                      content: const AboutContent(),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text('關閉'),
-                        ),
-                      ],
-                    );
-                  },
+          onTap: () {
+            // open a dialog
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: const Text('關於關連－臺灣版'),
+                  content: const AboutContent(),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('關閉'),
+                    ),
+                  ],
                 );
               },
-              child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Image.asset('assets/icon/connections.webp'),
-                      ),
-            ),
+            );
+          },
+          child: Wrap(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Image.asset('assets/icon/connections.webp'),
+              ),
+            ],
+          ),
+        ),
         title: Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            InkWell(
-              child: const Text('關連－臺灣版'),
-              onTap: () {
-                // open a dialog
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: const Text('關於關連－臺灣版'),
-                      content: const AboutContent(),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text('關閉'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-            ),
+            const Text('關聯臺灣版'),
+            const SizedBox(width: 8,),
             // a date picker to select date
-            InkWell(
-              onTap: () {
+            OutlinedButton(
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(Colors.white),
+              ),
+              onPressed: () {
                 showDatePicker(
                   context: context,
                   initialDate: selectedDate ?? DateTime.now(),
                   firstDate: availableDates.first,
                   lastDate: availableDates.last,
-
                   // show only available dates
                   selectableDayPredicate: (DateTime date) {
                     return availableDates.contains(date);
@@ -331,22 +316,20 @@ class GameScreenState extends State<GameScreen> {
                   }
                 });
               },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  selectedDate == null
-                      ? '選擇日期'
-                      : '${selectedDate!.year}/${selectedDate!.month.toString().padLeft(2, '0')}/${selectedDate!.day.toString().padLeft(2, '0')}',
-                  style: const TextStyle(fontSize: 16, color: Colors.white),
-                ),
+              child: Text(
+                selectedDate == null
+                    ? '選擇日期'
+                    : '${selectedDate!.year}/${selectedDate!.month.toString().padLeft(2, '0')}/${selectedDate!.day.toString().padLeft(2, '0')}',
+                style: const TextStyle(fontSize: 16, color: Colors.black),
               ),
             ),
           ],
         ),
-        actions: [   // leaderboard icon button
-                              LeaderboardIconButton(selectedDate: selectedDate),],
+        actions: [
+          // leaderboard icon button
+          LeaderboardIconButton(selectedDate: selectedDate),
+        ],
       ),
-      
       body: words.isEmpty
           ? const Center(child: Text('還沒有資料，請稍後再試。'))
           : Stack(
@@ -362,7 +345,7 @@ class GameScreenState extends State<GameScreen> {
                           const SizedBox(height: 16),
                           // Title
                           Text(
-                            isAllCompleted ? '恭喜你找到所有關聯!' : '選擇四個有關連性的字按下提交',
+                            isAllCompleted ? '恭喜您找到所有關聯！' : '選擇四個有關連性的字按下提交',
                             style: const TextStyle(fontSize: 25),
                           ),
                           const SizedBox(height: 16),
@@ -436,9 +419,18 @@ class GameScreenState extends State<GameScreen> {
                                         style: TextStyle(fontSize: 16)),
                                   ),
                                 ),
+                                if (isAllCompleted)
+                                ElevatedButton(
+                                  onPressed: openLeaderboardOptInDialog,
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text('參加排行榜',
+                                        style: TextStyle(fontSize: 16)),
+                                  ),
+                                ),
                             ],
                           ),
-                          
+
                           const SizedBox(
                             height: 8,
                           ),

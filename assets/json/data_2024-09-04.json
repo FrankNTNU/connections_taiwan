@@ -1,74 +1,74 @@
 {
     "difficultyDescriptions": {
-      "easy": "面試要帶的東西",
-      "normal": "生病要吃這些",
-      "hard": "裡面有包東西",
-      "expert": "社群媒體的圖示"
+      "easy": "中秋節主題",
+      "normal": "美味的蛋料理",
+      "hard": "星座",
+      "expert": "尖銳的"
     },
     "words": [
       {
-        "word": "履歷表",
-        "difficulty": "easy"
-      },
-      {
-        "word": "作品",
-        "difficulty": "easy"
-      },
-      {
-        "word": "身分證",
-        "difficulty": "easy"
-      },
-      {
-        "word": "推薦函",
-        "difficulty": "easy"
-      },
-      {
-        "word": "雞湯",
+        "word": "茶葉",
         "difficulty": "normal"
       },
       {
-        "word": "粥",
+        "word": "太陽",
         "difficulty": "normal"
       },
       {
-        "word": "薑茶",
+        "word": "惡魔",
         "difficulty": "normal"
       },
       {
-        "word": "維他命C",
+        "word": "溫泉",
         "difficulty": "normal"
       },
       {
-        "word": "作品",
-        "difficulty": "hard"
-      },
-      {
-        "word": "紅包",
-        "difficulty": "hard"
-      },
-      {
-        "word": "禮物",
-        "difficulty": "hard"
-      },
-      {
-        "word": "魚丸",
-        "difficulty": "hard"
-      },
-      {
-        "word": "音符",
+        "word": "聲音",
         "difficulty": "expert"
       },
       {
-        "word": "阿飄",
+        "word": "水果刀",
         "difficulty": "expert"
       },
       {
-        "word": "叉叉",
+        "word": "評語",
         "difficulty": "expert"
       },
       {
-        "word": "相機",
+        "word": "紙張",
         "difficulty": "expert"
+      },
+      {
+        "word": "獅子",
+        "difficulty": "hard"
+      },
+      {
+        "word": "螃蟹",
+        "difficulty": "hard"
+      },
+      {
+        "word": "瓶子",
+        "difficulty": "hard"
+      },
+      {
+        "word": "秤",
+        "difficulty": "hard"
+      },
+      {
+        "word": "兔子",
+        "difficulty": "easy"
+      },
+      {
+        "word": "烤肉",
+        "difficulty": "easy"
+      },
+      {
+        "word": "柚子",
+        "difficulty": "easy"
+      },
+      {
+        "word": "月亮",
+        "difficulty": "easy"
       }
     ]
   }

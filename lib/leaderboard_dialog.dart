@@ -19,13 +19,13 @@ class LeaderboardDialog extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Container(
                 constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.5),
+                    maxHeight: MediaQuery.of(context).size.height * 0.3),
                 child: const Center(child: CircularProgressIndicator()));
           }
           if (snapshot.hasError) {
             return Container(
                 constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.5),
+                    maxHeight: MediaQuery.of(context).size.height * 0.3),
                 child: const Center(child: Text('發生錯誤')));
           }
           if (snapshot.hasData) {
@@ -34,7 +34,7 @@ class LeaderboardDialog extends StatelessWidget {
             if (leaderboard.isEmpty) {
               return Container(
                   constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(context).size.height * 0.5),
+                      maxHeight: MediaQuery.of(context).size.height * 0.3),
                   child: const Center(child: Text('目前沒有資料')));
             }
             return SingleChildScrollView(
