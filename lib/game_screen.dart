@@ -367,121 +367,126 @@ class GameScreenState extends State<GameScreen> {
               children: [
                 InteractiveViewer(
                   child: LayoutBuilder(builder: (context, constraints) {
-                    return SingleChildScrollView(
-                      child: Center(
-                        child: Container(
-                          height: constraints.maxHeight,
-                          width: double.infinity,
-                          constraints: const BoxConstraints(maxWidth: 800),
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const SizedBox(height: 16),
-                              // Title
-                              Text(
-                                isAllCompleted
-                                    ? '恭喜您找到所有關聯！'
-                                    : '選擇四個有關連性的字按下提交',
-                                style: const TextStyle(fontSize: 25),
-                              ),
-                              const SizedBox(height: 16),
-                              // Completed words
-                              if (words.where((e) => e.isCompleted).isNotEmpty)
-                                CompletedWords(
-                                    difficulitiesSolved: difficulitiesSolved,
-                                    words: words,
-                                    difficultyDescriptionMap:
-                                        difficultyDescriptionMap),
-                              const SizedBox(height: 8),
-                              // Uncompleted words
-                              SizedBox(
-                                width: double.infinity,
-                                child: Wrap(
-                                  spacing: Constants
-                                      .cardHorizontalSpacing, // Spacing between items
-                                  runSpacing: 8, // Spacing between lines
-                                  alignment: WrapAlignment
-                                      .center, // Center items horizontally
+                    return Center(
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              width: double.infinity,
+                              constraints: const BoxConstraints(maxWidth: 800),
+                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    for (var word
-                                        in words.where((e) => !e.isCompleted))
-                                      WordCard(
-                                        word: word.word,
-                                        isSelected: word.isSelected,
-                                        onTap: () => wordCardOnTap(word.word),
-                                      )
+                                    const SizedBox(height: 16),
+                                    // Title
+                                    Text(
+                                      isAllCompleted
+                                          ? '恭喜您找到所有關聯！'
+                                          : '選擇四個有關連性的字按下提交',
+                                      style: const TextStyle(fontSize: 25),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    // Completed words
+                                    if (words.where((e) => e.isCompleted).isNotEmpty)
+                                      CompletedWords(
+                                          difficulitiesSolved: difficulitiesSolved,
+                                          words: words,
+                                          difficultyDescriptionMap:
+                                              difficultyDescriptionMap),
+                                    const SizedBox(height: 8),
+                                    // Uncompleted words
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: Wrap(
+                                        spacing: Constants
+                                            .cardHorizontalSpacing, // Spacing between items
+                                        runSpacing: 8, // Spacing between lines
+                                        alignment: WrapAlignment
+                                            .center, // Center items horizontally
+                                        children: [
+                                          for (var word
+                                              in words.where((e) => !e.isCompleted))
+                                            WordCard(
+                                              word: word.word,
+                                              isSelected: word.isSelected,
+                                              onTap: () => wordCardOnTap(word.word),
+                                            )
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    // Button group
+                                    Wrap(
+                                      spacing: 8,
+                                      alignment: WrapAlignment.center,
+                                      children: [
+                                        if (isAllCompleted)
+                                          OutlinedButton(
+                                            onPressed: resetCompletedAndSelected,
+                                            child: const Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              child: Text('重新開始',
+                                                  style: TextStyle(fontSize: 16)),
+                                            ),
+                                          ),
+                                        if (!isAllCompleted)
+                                          OutlinedButton(
+                                            onPressed: deSelectAll,
+                                            child: const Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              child: Text('清除選擇',
+                                                  style: TextStyle(fontSize: 16)),
+                                            ),
+                                          ),
+                                        if (!isAllCompleted)
+                                          OutlinedButton(
+                                            onPressed: shuffleWords,
+                                            child: const Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              child: Text('洗牌',
+                                                  style: TextStyle(fontSize: 16)),
+                                            ),
+                                          ),
+                                        if (!isAllCompleted)
+                                          ElevatedButton(
+                                            onPressed: checkAnswers,
+                                            child: const Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              child: Text(
+                                                '提交',
+                                                style: TextStyle(fontSize: 16),
+                                              ),
+                                            ),
+                                          ),
+                                        if (isAllCompleted && false)
+                                          ElevatedButton(
+                                            // amber
+                                            style: ButtonStyle(
+                                              backgroundColor:
+                                                  WidgetStateProperty.all(
+                                                      Colors.amber),
+                                            ),
+                                            onPressed: openLeaderboardOptInDialog,
+                                            child: const Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              child: Text('參加排行榜',
+                                                  style: TextStyle(fontSize: 16)),
+                                            ),
+                                          ),
+                                        //const GoogleSigninButton()
+                                      ],
+                                    ),
+                                    const SizedBox(
+                                      height: 32,
+                                    ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 16),
-                              // Button group
-                              Wrap(
-                                spacing: 8,
-                                alignment: WrapAlignment.center,
-                                children: [
-                                  if (isAllCompleted)
-                                    OutlinedButton(
-                                      onPressed: resetCompletedAndSelected,
-                                      child: const Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Text('重新開始',
-                                            style: TextStyle(fontSize: 16)),
-                                      ),
-                                    ),
-                                  if (!isAllCompleted)
-                                    OutlinedButton(
-                                      onPressed: deSelectAll,
-                                      child: const Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Text('清除選擇',
-                                            style: TextStyle(fontSize: 16)),
-                                      ),
-                                    ),
-                                  if (!isAllCompleted)
-                                    OutlinedButton(
-                                      onPressed: shuffleWords,
-                                      child: const Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Text('洗牌',
-                                            style: TextStyle(fontSize: 16)),
-                                      ),
-                                    ),
-                                  if (!isAllCompleted)
-                                    ElevatedButton(
-                                      onPressed: checkAnswers,
-                                      child: const Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Text(
-                                          '提交',
-                                          style: TextStyle(fontSize: 16),
-                                        ),
-                                      ),
-                                    ),
-                                  if (isAllCompleted && false)
-                                    ElevatedButton(
-                                      // amber
-                                      style: ButtonStyle(
-                                        backgroundColor:
-                                            WidgetStateProperty.all(
-                                                Colors.amber),
-                                      ),
-                                      onPressed: openLeaderboardOptInDialog,
-                                      child: const Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Text('參加排行榜',
-                                            style: TextStyle(fontSize: 16)),
-                                      ),
-                                    ),
-                                  //const GoogleSigninButton()
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 32,
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     );
                   }),
