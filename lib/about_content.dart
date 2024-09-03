@@ -1,5 +1,7 @@
 import 'package:connections_taiwan/constants.dart';
+import 'package:connections_taiwan/snackbar_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutContent extends StatelessWidget {
@@ -57,7 +59,17 @@ class AboutContent extends StatelessWidget {
                 children: [
                   const Text('若有問題或回饋都可以寄信到'),
                   TextButton(
-                      onPressed: () {
+                      onPressed: () async {
+                        var uri = Uri.parse(
+                            'mailto:${Constants.developerEmail}?subject=關連－臺灣版問題或回饋&body=');
+                        bool canLaunch = await canLaunchUrl(uri);
+                        if (!canLaunch) {
+                          // copy email to clipboard
+                          await Clipboard.setData(const ClipboardData(
+                              text: Constants.developerEmail));
+                              showSnackBar(context, '已複製開發者信箱');
+                          return;
+                        }
                         // open email app with launch url
                         launchUrl(Uri.parse(
                             'mailto:${Constants.developerEmail}?subject=關連－臺灣版問題或回饋&body='));
