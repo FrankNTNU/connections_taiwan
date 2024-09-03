@@ -9,8 +9,11 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'about_content.dart';
+import 'completed_words.dart';
 import 'leaderboard_icon_button.dart';
 import 'snackbar_utils.dart';
+import 'username_input_dialog.dart';
 import 'word_model.dart';
 
 class GameScreen extends StatefulWidget {
@@ -276,72 +279,7 @@ class GameScreenState extends State<GameScreen> {
                   builder: (context) {
                     return AlertDialog(
                       title: const Text('關於關連－臺灣版'),
-                      content: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                                '每局共有4組關聯字，每組關聯字包含四個畫面上出現的字。例如：玫瑰、薔薇、月季、康乃馨都與花有關連。'),
-                            const Divider(),
-
-                            const Text('難度與顏色對應：',
-                                style: TextStyle(fontSize: 16)),
-                            // show color and difficulty name
-                            for (var difficultyTuple in [
-                              (Difficulty.easy, '容易'),
-                              (Difficulty.normal, '中等'),
-                              (Difficulty.hard, '困難'),
-                              (Difficulty.expert, '專家'),
-                            ])
-                              Row(
-                                children: [
-                                  Container(
-                                    width: 16,
-                                    height: 16,
-                                    color:
-                                        difficultyColorMap[difficultyTuple.$1],
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(difficultyTuple.$2),
-                                ],
-                              ),
-                            // data privacy
-                            const Divider(),
-                            const Row(
-                              children: [
-                                // icon
-                                Icon(Icons.privacy_tip_outlined),
-                                SizedBox(width: 8),
-                                Expanded(
-                                    child:
-                                        Text('本網站不會收集任何個人資料，也不會使用任何 Cookie。')),
-                              ],
-                            ),
-                            // add author email
-                            const Divider(),
-                            Row(
-                              children: [
-                                const Icon(Icons.email_outlined),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                    child: Wrap(
-                                  children: [
-                                    const Text('若有問題或回饋都可以寄信到'),
-                                    TextButton(
-                                        onPressed: () {
-                                          // open email app with launch url
-                                          launchUrl(Uri.parse(
-                                              'mailto:${Constants.developerEmail}?subject=關連－臺灣版問題或回饋&body='));
-                                        },
-                                        child: const Text(
-                                            Constants.developerEmail))
-                                  ],
-                                ))
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
+                      content: const AboutContent(),
                       actions: [
                         TextButton(
                           onPressed: () {
@@ -464,71 +402,11 @@ class GameScreenState extends State<GameScreen> {
                           const SizedBox(height: 16),
                           // Completed words
                           if (words.where((e) => e.isCompleted).isNotEmpty)
-                            Wrap(
-                              runSpacing: 8,
-                              children: [
-                                for (var difficulty in difficulitiesSolved)
-                                  if (words
-                                      .where((e) =>
-                                          e.difficulty == difficulty &&
-                                          e.isCompleted)
-                                      .isNotEmpty)
-                                    Column(
-                                      children: [
-                                        LayoutBuilder(
-                                          builder: (context, constraints) =>
-                                              Container(
-                                            height: Constants.wordCardHeight,
-                                            alignment: Alignment.center,
-                                            width: (constraints.maxWidth /
-                                                        Constants
-                                                            .wordCardWidthDevisionFactor) *
-                                                    4 +
-                                                Constants
-                                                        .cardHorizontalSpacing *
-                                                    3,
-                                            decoration: BoxDecoration(
-                                              color: difficultyColorMap[
-                                                  difficulty],
-                                              borderRadius:
-                                                  BorderRadius.circular(16),
-                                            ),
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  difficultyDescriptionMap[
-                                                      difficulty]!,
-                                                  style: const TextStyle(
-                                                    fontSize: 25,
-                                                    color: Colors.black,
-                                                  ),
-                                                ),
-                                                FittedBox(
-                                                  fit: BoxFit.scaleDown,
-                                                  child: Text(
-                                                    words
-                                                        .where((e) =>
-                                                            e.difficulty ==
-                                                                difficulty &&
-                                                            e.isCompleted)
-                                                        .map((e) => e.word)
-                                                        .join('、'),
-                                                    style: const TextStyle(
-                                                      fontSize: 25,
-                                                      color: Colors.black,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                              ],
-                            ),
+                            CompletedWords(
+                                difficulitiesSolved: difficulitiesSolved,
+                                words: words,
+                                difficultyDescriptionMap:
+                                    difficultyDescriptionMap),
                           const SizedBox(height: 8),
                           // Uncompleted words
                           SizedBox(
@@ -597,7 +475,6 @@ class GameScreenState extends State<GameScreen> {
                           const SizedBox(
                             height: 8,
                           ),
-
                           const SizedBox(height: 16),
                         ],
                       ),

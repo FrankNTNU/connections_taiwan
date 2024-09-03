@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:connections_taiwan/constants.dart';
-import 'package:flutter/services.dart';
 import 'package:supabase/supabase.dart';
 
 class LeaderboardModel {
