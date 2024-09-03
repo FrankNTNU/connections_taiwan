@@ -13,7 +13,8 @@ class AboutContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('本遊戲由NYT的Connections啟發。每局共有4組關聯字，每組關聯字包含四個畫面上出現的字。例如：玫瑰、薔薇、月季、康乃馨都與花有關連。'),
+          const Text(
+              '本遊戲由NYT的Connections啟發。每局共有4組關聯字，每組關聯字包含四個畫面上出現的字。例如：玫瑰、薔薇、月季、康乃馨都與花有關連。'),
           const Divider(),
 
           const Text('難度與顏色對應：', style: TextStyle(fontSize: 16)),
@@ -66,7 +67,9 @@ class AboutContent extends StatelessWidget {
               ))
             ],
           ),
-
+          // add version number
+          const Divider(),
+          const Text('版本號碼：${Constants.version}'),
         ],
       ),
     );
