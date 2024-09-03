@@ -52,7 +52,7 @@ class _UsernameInputDialogState extends State<UsernameInputDialog> {
                 child: const Text('不紀錄'),
               ),
               TextButton(
-                onPressed: () {
+                onPressed: () async {
                   if (username.isEmpty) {
                     showSnackBar(context, '請輸入你的名字。');
                     return;
@@ -60,20 +60,22 @@ class _UsernameInputDialogState extends State<UsernameInputDialog> {
                   if (username.isNotEmpty) {
                     String gameTitle =
                         '${widget.selectedDate!.year}/${widget.selectedDate!.month.toString().padLeft(2, '0')}/${widget.selectedDate!.day.toString().padLeft(2, '0')}';
-                    LeaderboardModel.addToLeaderboard(
+                    await LeaderboardModel.addToLeaderboard(
                       LeaderboardModel(
                         username: username,
                         timeSolved: currentTime,
                         gameTitle: gameTitle,
                       ),
                     );
-                    Navigator.of(context).pop();
-                    // open leaderboard dialog
-                    showDialog(
-                      context: context,
-                      builder: (context) =>
-                          LeaderboardDialog(gameTitle: gameTitle),
-                    );
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                      // open leaderboard dialog
+                      showDialog(
+                        context: context,
+                        builder: (context) =>
+                            LeaderboardDialog(gameTitle: gameTitle),
+                      );
+                    }
                   } else {
                     showSnackBar(context, '請輸入你的名字。');
                   }

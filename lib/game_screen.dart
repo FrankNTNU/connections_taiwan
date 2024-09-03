@@ -2,12 +2,10 @@ import 'dart:convert';
 
 import 'package:confetti/confetti.dart';
 import 'package:connections_taiwan/constants.dart';
-import 'package:connections_taiwan/leaderboard_model.dart';
 import 'package:connections_taiwan/word_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'about_content.dart';
 import 'completed_words.dart';
@@ -136,54 +134,19 @@ class GameScreenState extends State<GameScreen> {
       // confetti
       confettiController.play();
       // show a dialog asking for username to add to leaderboard or opt out
-      showDialog(
-        context: context,
-        builder: (context) {
-          String username = '';
-          return AlertDialog(
-            title: const Text('恭喜！找到所有有關連性的字。'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('請輸入你的名字：'),
-                TextField(
-                  onChanged: (value) {
-                    username = value;
-                  },
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('取消'),
-              ),
-              TextButton(
-                onPressed: () {
-                  if (username.isNotEmpty) {
-                    String gameTitle =
-                        '${selectedDate!.year}/${selectedDate!.month.toString().padLeft(2, '0')}/${selectedDate!.day.toString().padLeft(2, '0')}';
-                    LeaderboardModel.addToLeaderboard(
-                      LeaderboardModel(
-                        username: username,
-                        timeSolved: DateTime.now(),
-                        gameTitle: gameTitle,
-                      ),
-                    );
-                    Navigator.of(context).pop();
-                  } else {
-                    showSnackBar(context, '請輸入你的名字。');
-                  }
-                },
-                child: const Text('確定'),
-              ),
-            ],
-          );
-        },
-      );
+      openLeaderboardOptInDialog();
     }
+  }
+
+  void openLeaderboardOptInDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return UsernameInputDialog(
+          selectedDate: selectedDate,
+        );
+      },
+    );
   }
 
   void deSelectAll() {
@@ -265,13 +228,11 @@ class GameScreenState extends State<GameScreen> {
     bool isAllCompleted = words.where((e) => !e.isCompleted).isEmpty;
     return Scaffold(
       appBar: AppBar(
-        title: Row(
+        title: Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             InkWell(
-              child: const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text('關聯－臺灣版'),
-              ),
+              child: const Text('關聯－臺灣版'),
               onTap: () {
                 // open a dialog
                 showDialog(

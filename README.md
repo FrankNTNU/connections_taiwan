@@ -1,6 +1,6 @@
 # connections_taiwan
 
-A new Flutter project.
+關聯 - 臺灣版
 
 ## Getting Started
 
