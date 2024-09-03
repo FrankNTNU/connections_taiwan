@@ -1,4 +1,3 @@
-import 'package:connections_taiwan/leaderboard_model.dart';
 import 'package:flutter/material.dart';
 
 import 'leaderboard_dialog.dart';

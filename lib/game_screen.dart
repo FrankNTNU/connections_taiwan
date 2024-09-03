@@ -198,6 +198,11 @@ class GameScreenState extends State<GameScreen> {
         'difficulitiesSolved',
         difficulitiesSolved.map((e) => e.name).toList(),
       );
+      // save selectedDate to Shared Preferences
+      prefs.setString(
+        'selectedDate',
+        selectedDate.toString(),
+      );
     });
   }
 
@@ -218,6 +223,12 @@ class GameScreenState extends State<GameScreen> {
               .map((e) =>
                   Difficulty.values.firstWhere((element) => element.name == e))
               .toList();
+        });
+      }
+      final String? selectedDateJson = prefs.getString('selectedDate');
+      if (selectedDateJson != null) {
+        setState(() {
+          selectedDate = DateTime.parse(selectedDateJson);
         });
       }
     });
