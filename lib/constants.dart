@@ -5,6 +5,11 @@ class Constants {
   static const double wordCardHeight = 90;
   static const double cardHorizontalSpacing = 8;
   static const double wordCardWidthDevisionFactor = 4.5;
+  static const String developerEmail = 'frankhuang66655@gmail.com';
+  // supabaseUrl
+  static const String supabaseUrl = 'https://abmdqijlmzgqqlhdqcrc.supabase.co';
+  static const String supabaseKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFibWRxaWpsbXpncXFsaGRxY3JjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTMyMzg2ODIsImV4cCI6MjAyODgxNDY4Mn0.Tb4aiBZHYhSeWqH-FBzWpGUzbAPREfl66o8x2Zwyavc';
 }
 
 enum Difficulty { easy, normal, hard, expert }

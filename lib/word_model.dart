@@ -56,24 +56,21 @@ class WordModel {
   static Future<(List<WordModel>, Map<Difficulty, String>)?> loadData(
       DateTime? dateTime) async {
     // date in yyyy-mm-dd format
-    final String dateString = (dateTime ?? DateTime.now())
-        .toString()
-        .split(' ')[0];
+    final String dateString =
+        (dateTime ?? DateTime.now()).toString().split(' ')[0];
     print('dateString: $dateString');
     final fileName = 'assets/json/data_$dateString.json';
     // check if file exists
-    final bool fileExists = await rootBundle.loadString(fileName).then((_) {
-      return true;
-    }).catchError((_) {
-      return false;
-    });
+    final bool fileExists = await rootBundle
+        .loadString(fileName)
+        .then((_) => true)
+        .catchError((_) => false);
     if (!fileExists) {
       return null;
     }
     String jsonString =
         await rootBundle.loadString('assets/json/data_$dateString.json');
     Map<String, dynamic> jsonData = jsonDecode(jsonString);
-    print('jsonData: $jsonData');
     // Load difficulty descriptions
     final Map<Difficulty, String> difficultyDescriptionMap = {};
     (jsonData['difficultyDescriptions'] as Map<String, dynamic>)

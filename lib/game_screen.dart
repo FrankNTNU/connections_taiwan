@@ -1,11 +1,15 @@
 import 'dart:convert';
 
+import 'package:confetti/confetti.dart';
 import 'package:connections_taiwan/constants.dart';
+import 'package:connections_taiwan/leaderboard_model.dart';
 import 'package:connections_taiwan/word_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:confetti/confetti.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import 'leaderboard_icon_button.dart';
 import 'snackbar_utils.dart';
 import 'word_model.dart';
 
@@ -44,7 +48,6 @@ class GameScreenState extends State<GameScreen> {
 
   void getAllFileDates() {
     rootBundle.loadString('AssetManifest.json').then((value) {
-      print('value: $value');
       final List<String> fileNames = (jsonDecode(value) as Map<String, dynamic>)
           .keys
           .where((fileName) => fileName.startsWith('assets/json/data_'))
@@ -129,6 +132,54 @@ class GameScreenState extends State<GameScreen> {
       showSnackBar(context, '恭喜！找到所有有關連性的字。', isError: false);
       // confetti
       confettiController.play();
+      // show a dialog asking for username to add to leaderboard or opt out
+      showDialog(
+        context: context,
+        builder: (context) {
+          String username = '';
+          return AlertDialog(
+            title: const Text('恭喜！找到所有有關連性的字。'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('請輸入你的名字：'),
+                TextField(
+                  onChanged: (value) {
+                    username = value;
+                  },
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () {
+                  if (username.isNotEmpty) {
+                    String gameTitle =
+                        '${selectedDate!.year}/${selectedDate!.month.toString().padLeft(2, '0')}/${selectedDate!.day.toString().padLeft(2, '0')}';
+                    LeaderboardModel.addToLeaderboard(
+                      LeaderboardModel(
+                        username: username,
+                        timeSolved: DateTime.now(),
+                        gameTitle: gameTitle,
+                      ),
+                    );
+                    Navigator.of(context).pop();
+                  } else {
+                    showSnackBar(context, '請輸入你的名字。');
+                  }
+                },
+                child: const Text('確定'),
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 
@@ -214,7 +265,10 @@ class GameScreenState extends State<GameScreen> {
         title: Row(
           children: [
             InkWell(
-              child: const Text('關聯－臺灣版'),
+              child: const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text('關聯－臺灣版'),
+              ),
               onTap: () {
                 // open a dialog
                 showDialog(
@@ -228,8 +282,10 @@ class GameScreenState extends State<GameScreen> {
                           children: [
                             const Text(
                                 '每局共有4組關聯字，每組關聯字包含四個畫面上出現的字。例如：玫瑰、薔薇、月季、康乃馨都與花有關連。'),
-                            const SizedBox(height: 8),
-                            const Text('難度與顏色對應：'),
+                            const Divider(),
+
+                            const Text('難度與顏色對應：',
+                                style: TextStyle(fontSize: 16)),
                             // show color and difficulty name
                             for (var difficultyTuple in [
                               (Difficulty.easy, '容易'),
@@ -249,6 +305,40 @@ class GameScreenState extends State<GameScreen> {
                                   Text(difficultyTuple.$2),
                                 ],
                               ),
+                            // data privacy
+                            const Divider(),
+                            const Row(
+                              children: [
+                                // icon
+                                Icon(Icons.privacy_tip_outlined),
+                                SizedBox(width: 8),
+                                Expanded(
+                                    child:
+                                        Text('本網站不會收集任何個人資料，也不會使用任何 Cookie。')),
+                              ],
+                            ),
+                            // add author email
+                            const Divider(),
+                            Row(
+                              children: [
+                                const Icon(Icons.email_outlined),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                    child: Wrap(
+                                  children: [
+                                    const Text('若有問題或回饋都可以寄信到'),
+                                    TextButton(
+                                        onPressed: () {
+                                          // open email app with launch url
+                                          launchUrl(Uri.parse(
+                                              'mailto:${Constants.developerEmail}?subject=關連－臺灣版問題或回饋&body='));
+                                        },
+                                        child: const Text(
+                                            Constants.developerEmail))
+                                  ],
+                                ))
+                              ],
+                            )
                           ],
                         ),
                       ),
@@ -265,53 +355,58 @@ class GameScreenState extends State<GameScreen> {
                 );
               },
             ),
-            const SizedBox(width: 8),
             // a date picker to select date
-            OutlinedButton(
-                onPressed: () {
-                  showDatePicker(
-                    context: context,
-                    initialDate: selectedDate ?? DateTime.now(),
-                    firstDate: availableDates.first,
-                    lastDate: availableDates.last,
+            InkWell(
+              onTap: () {
+                showDatePicker(
+                  context: context,
+                  initialDate: selectedDate ?? DateTime.now(),
+                  firstDate: availableDates.first,
+                  lastDate: availableDates.last,
 
-                    // show only available dates
-                    selectableDayPredicate: (DateTime date) {
-                      return availableDates.contains(date);
-                    },
-                    // show 選擇日期 button
-                    cancelText: '取消',
-                    confirmText: '選擇日期',
-                    // change 'SELECT DATE' to '選擇日期'
-                    helpText: '選擇日期',
-                  ).then((value) {
-                    if (value != null) {
+                  // show only available dates
+                  selectableDayPredicate: (DateTime date) {
+                    return availableDates.contains(date);
+                  },
+                  // show 選擇日期 button
+                  cancelText: '取消',
+                  confirmText: '選擇日期',
+                  // change 'SELECT DATE' to '選擇日期'
+                  helpText: '選擇日期',
+                ).then((value) {
+                  if (value != null) {
+                    setState(() {
+                      selectedDate = value;
+                    });
+                    WordModel.loadData(value).then((value) {
+                      if (value == null) {
+                        return;
+                      }
                       setState(() {
-                        selectedDate = value;
+                        words = value.$1;
+                        words.shuffle();
+                        difficultyDescriptionMap = value.$2;
+                        difficulitiesSolved = [];
                       });
-                      WordModel.loadData(value).then((value) {
-                        if (value == null) {
-                          return;
-                        }
-                        setState(() {
-                          words = value.$1;
-                          words.shuffle();
-                          difficultyDescriptionMap = value.$2;
-                          difficulitiesSolved = [];
-                        });
-                        saveWordsToSharedPreferences();
-                        // stop confetti
-                        confettiController.stop();
-                      });
-                    }
-                  });
-                },
+                      saveWordsToSharedPreferences();
+                      // stop confetti
+                      confettiController.stop();
+                    });
+                  }
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
                 child: Text(
                   selectedDate == null
                       ? '選擇日期'
-                      : '${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}',
+                      : '${selectedDate!.year}/${selectedDate!.month.toString().padLeft(2, '0')}/${selectedDate!.day.toString().padLeft(2, '0')}',
                   style: const TextStyle(fontSize: 16, color: Colors.white),
-                )),
+                ),
+              ),
+            ),
+            // leaderboard icon button
+            LeaderboardIconButton(selectedDate: selectedDate),
           ],
         ),
         actions: [
@@ -499,6 +594,10 @@ class GameScreenState extends State<GameScreen> {
                                 ),
                             ],
                           ),
+                          const SizedBox(
+                            height: 8,
+                          ),
+
                           const SizedBox(height: 16),
                         ],
                       ),

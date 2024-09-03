@@ -1,11 +1,11 @@
 {
-    "name": "connections_taiwan",
-    "short_name": "connections_taiwan",
+    "name": "關聯臺灣版",
+    "short_name": "關聯臺灣版",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "關聯臺灣版",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
