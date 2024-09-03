@@ -64,7 +64,6 @@ class LeaderboardDialog extends StatelessWidget {
                       title: Text(leaderboard[i].username),
                       subtitle: Text(leaderboard[i]
                           .timeSolved
-                          .toLocal()
                           .toString()
                           .substring(0, 19)),
                     ),
