@@ -33,37 +33,37 @@ class GameScreenState extends State<GameScreen> {
   @override
   void initState() {
     super.initState();
-    getAllFileDates();
-    WordModel.loadData(DateTime.now()).then((value) {
-      if (value == null) {
-        return;
-      }
-      setState(() {
-        words = value.$1;
-        words.shuffle();
-        difficultyDescriptionMap = value.$2;
+    getAllFileDates().then((_) {
+      WordModel.loadData(selectedDate).then((value) {
+        if (value == null) {
+          return;
+        }
+        setState(() {
+          words = value.$1;
+          words.shuffle();
+          difficultyDescriptionMap = value.$2;
+        });
+        syncWordsFromSharedPreferences();
       });
-      syncWordsFromSharedPreferences();
     });
   }
 
-  void getAllFileDates() {
-    rootBundle.loadString('AssetManifest.json').then((value) {
-      final List<String> fileNames = (jsonDecode(value) as Map<String, dynamic>)
-          .keys
-          .where((fileName) => fileName.startsWith('assets/json/data_'))
-          .map((e) => e.split('_').last.split('.').first)
-          .toList();
-      print('fileNames: $fileNames');
-      setState(() {
-        availableDates = fileNames.map((e) => DateTime.parse(e)).toList();
-        selectedDate = // if there is today's date, select it, otherwise select the last date
-            // check year, month, day
-            availableDates.contains(DateTime(DateTime.now().year,
-                    DateTime.now().month, DateTime.now().day))
-                ? DateTime.now()
-                : availableDates.last;
-      });
+  Future<void> getAllFileDates() async {
+    var value = await rootBundle.loadString('AssetManifest.json');
+    final List<String> fileNames = (jsonDecode(value) as Map<String, dynamic>)
+        .keys
+        .where((fileName) => fileName.startsWith('assets/json/data_'))
+        .map((e) => e.split('_').last.split('.').first)
+        .toList();
+    print('fileNames: $fileNames');
+    setState(() {
+      availableDates = fileNames.map((e) => DateTime.parse(e)).toList();
+      selectedDate = // if there is today's date, select it, otherwise select the last date
+          // check year, month, day
+          availableDates.contains(DateTime(DateTime.now().year,
+                  DateTime.now().month, DateTime.now().day))
+              ? DateTime.now()
+              : availableDates.last;
     });
   }
 

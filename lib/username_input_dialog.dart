@@ -1,4 +1,3 @@
-import 'package:connections_taiwan/game_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'leaderboard_dialog.dart';
