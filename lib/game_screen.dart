@@ -241,7 +241,6 @@ class GameScreenState extends State<GameScreen> {
       }
       final String? difficultyDescriptionMapJson =
           prefs.getString('difficultyDescriptionMap');
-      print('difficultyDescriptionMapJson: $difficultyDescriptionMapJson');
       if (difficultyDescriptionMapJson != null) {
         setState(() {
           difficultyDescriptionMap = (json.decode(difficultyDescriptionMapJson)
