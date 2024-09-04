@@ -10,6 +10,8 @@ class Constants {
   static const String supabaseUrl = 'https://abmdqijlmzgqqlhdqcrc.supabase.co';
   static const String supabaseKey =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFibWRxaWpsbXpncXFsaGRxY3JjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTMyMzg2ODIsImV4cCI6MjAyODgxNDY4Mn0.Tb4aiBZHYhSeWqH-FBzWpGUzbAPREfl66o8x2Zwyavc';
+  // app version
+  static const String version = '1.0.4'; 
 }
 
 enum Difficulty { easy, normal, hard, expert }

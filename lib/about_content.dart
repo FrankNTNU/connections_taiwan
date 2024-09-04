@@ -1,5 +1,7 @@
 import 'package:connections_taiwan/constants.dart';
+import 'package:connections_taiwan/snackbar_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutContent extends StatelessWidget {
@@ -13,7 +15,8 @@ class AboutContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('每局共有4組關聯字，每組關聯字包含四個畫面上出現的字。例如：玫瑰、薔薇、月季、康乃馨都與花有關連。'),
+          const Text(
+              '本遊戲由NYT的Connections啟發。每局共有4組關聯字，每組關聯字包含四個畫面上出現的字。例如：玫瑰、薔薇、月季、康乃馨都與花有關連。'),
           const Divider(),
 
           const Text('難度與顏色對應：', style: TextStyle(fontSize: 16)),
@@ -56,7 +59,17 @@ class AboutContent extends StatelessWidget {
                 children: [
                   const Text('若有問題或回饋都可以寄信到'),
                   TextButton(
-                      onPressed: () {
+                      onPressed: () async {
+                        var uri = Uri.parse(
+                            'mailto:${Constants.developerEmail}?subject=關連－臺灣版問題或回饋&body=');
+                        bool canLaunch = await canLaunchUrl(uri);
+                        if (!canLaunch) {
+                          // copy email to clipboard
+                          await Clipboard.setData(const ClipboardData(
+                              text: Constants.developerEmail));
+                              showSnackBar(context, '已複製開發者信箱');
+                          return;
+                        }
                         // open email app with launch url
                         launchUrl(Uri.parse(
                             'mailto:${Constants.developerEmail}?subject=關連－臺灣版問題或回饋&body='));
@@ -65,7 +78,10 @@ class AboutContent extends StatelessWidget {
                 ],
               ))
             ],
-          )
+          ),
+          // add version number
+          const Divider(),
+          const Text('版本號碼：${Constants.version}'),
         ],
       ),
     );
