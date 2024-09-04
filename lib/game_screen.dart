@@ -1,8 +1,9 @@
 import 'dart:convert';
+// html
+import 'dart:html' as html;
 
 import 'package:confetti/confetti.dart';
 import 'package:connections_taiwan/constants.dart';
-import 'package:connections_taiwan/google_signin_button.dart';
 import 'package:connections_taiwan/word_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'about_content.dart';
 import 'completed_words.dart';
 import 'leaderboard_icon_button.dart';
+import 'privacy_screen.dart';
 import 'snackbar_utils.dart';
 import 'username_input_dialog.dart';
 import 'word_model.dart';
@@ -35,6 +37,17 @@ class GameScreenState extends State<GameScreen> {
   @override
   void initState() {
     super.initState();
+    print('Url [GameScreen]: ${Uri.base}');
+    Future.delayed(Duration.zero, () async {
+      if (Uri.base.toString().contains('privacy')) {
+        setState(() {
+          html.window.history.pushState(null, '關聯_臺灣版', '/');
+          Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const PrivacyScreen()));
+        });
+      }
+    });
+    if (!mounted) return;
     getAllFileDates().then((_) {
       WordModel.loadData(selectedDate).then((value) {
         if (value == null) {
