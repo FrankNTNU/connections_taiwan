@@ -374,7 +374,8 @@ class GameScreenState extends State<GameScreen> {
                             child: Container(
                               width: double.infinity,
                               constraints: const BoxConstraints(maxWidth: 800),
-                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 4.0),
                               child: SingleChildScrollView(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -389,9 +390,12 @@ class GameScreenState extends State<GameScreen> {
                                     ),
                                     const SizedBox(height: 16),
                                     // Completed words
-                                    if (words.where((e) => e.isCompleted).isNotEmpty)
+                                    if (words
+                                        .where((e) => e.isCompleted)
+                                        .isNotEmpty)
                                       CompletedWords(
-                                          difficulitiesSolved: difficulitiesSolved,
+                                          difficulitiesSolved:
+                                              difficulitiesSolved,
                                           words: words,
                                           difficultyDescriptionMap:
                                               difficultyDescriptionMap),
@@ -406,12 +410,13 @@ class GameScreenState extends State<GameScreen> {
                                         alignment: WrapAlignment
                                             .center, // Center items horizontally
                                         children: [
-                                          for (var word
-                                              in words.where((e) => !e.isCompleted))
+                                          for (var word in words
+                                              .where((e) => !e.isCompleted))
                                             WordCard(
                                               word: word.word,
                                               isSelected: word.isSelected,
-                                              onTap: () => wordCardOnTap(word.word),
+                                              onTap: () =>
+                                                  wordCardOnTap(word.word),
                                             )
                                         ],
                                       ),
@@ -424,11 +429,13 @@ class GameScreenState extends State<GameScreen> {
                                       children: [
                                         if (isAllCompleted)
                                           OutlinedButton(
-                                            onPressed: resetCompletedAndSelected,
+                                            onPressed:
+                                                resetCompletedAndSelected,
                                             child: const Padding(
                                               padding: EdgeInsets.all(8.0),
                                               child: Text('重新開始',
-                                                  style: TextStyle(fontSize: 16)),
+                                                  style:
+                                                      TextStyle(fontSize: 16)),
                                             ),
                                           ),
                                         if (!isAllCompleted)
@@ -437,7 +444,8 @@ class GameScreenState extends State<GameScreen> {
                                             child: const Padding(
                                               padding: EdgeInsets.all(8.0),
                                               child: Text('清除選擇',
-                                                  style: TextStyle(fontSize: 16)),
+                                                  style:
+                                                      TextStyle(fontSize: 16)),
                                             ),
                                           ),
                                         if (!isAllCompleted)
@@ -446,7 +454,8 @@ class GameScreenState extends State<GameScreen> {
                                             child: const Padding(
                                               padding: EdgeInsets.all(8.0),
                                               child: Text('洗牌',
-                                                  style: TextStyle(fontSize: 16)),
+                                                  style:
+                                                      TextStyle(fontSize: 16)),
                                             ),
                                           ),
                                         if (!isAllCompleted)
@@ -468,11 +477,13 @@ class GameScreenState extends State<GameScreen> {
                                                   WidgetStateProperty.all(
                                                       Colors.amber),
                                             ),
-                                            onPressed: openLeaderboardOptInDialog,
+                                            onPressed:
+                                                openLeaderboardOptInDialog,
                                             child: const Padding(
                                               padding: EdgeInsets.all(8.0),
                                               child: Text('參加排行榜',
-                                                  style: TextStyle(fontSize: 16)),
+                                                  style:
+                                                      TextStyle(fontSize: 16)),
                                             ),
                                           ),
                                         //const GoogleSigninButton()

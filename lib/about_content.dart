@@ -1,25 +1,12 @@
 import 'package:connections_taiwan/constants.dart';
-import 'package:connections_taiwan/snackbar_utils.dart';
-import 'package:connections_taiwan/snackbar_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher_string.dart';
+
+import 'privacy_screen.dart';
 
 class AboutContent extends StatelessWidget {
   const AboutContent({
     super.key,
   });
-  void _launchMailClient(BuildContext context) async {
-    String mailUrl =
-        'mailto:${Constants.developerEmail}?subject=關連－臺灣版問題或回饋&body=';
-    try {
-      await launchUrlString(mailUrl);
-    } catch (e) {
-      await Clipboard.setData(
-          const ClipboardData(text: Constants.developerEmail));
-      if (context.mounted) showSnackBar(context, '已將開發者信箱複製到剪貼簿。');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +17,6 @@ class AboutContent extends StatelessWidget {
           const Text(
               '本遊戲由NYT的Connections啟發。每局共有4組關聯字，每組關聯字包含四個畫面上出現的字。例如：玫瑰、薔薇、月季、康乃馨都與花有關連。'),
           const Divider(),
-
           const Text('難度與顏色對應：', style: TextStyle(fontSize: 16)),
           // show color and difficulty name
           for (var difficultyTuple in [
@@ -50,38 +36,16 @@ class AboutContent extends StatelessWidget {
                 Text(difficultyTuple.$2),
               ],
             ),
-          // data privacy
           const Divider(),
-          const Row(
-            children: [
-              // icon
-              Icon(Icons.privacy_tip_outlined),
-              SizedBox(width: 8),
-              Expanded(child: Text('本網站不會收集任何個人資料，也不會使用任何 Cookie。')),
-            ],
+          // privacy link button
+          TextButton(
+            onPressed: () {
+              // go to /privacy
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const PrivacyScreen()));
+            },
+            child: const Text('隱私權政策'),
           ),
-          // add author email
-          const Divider(),
-          Row(
-            children: [
-              const Icon(Icons.email_outlined),
-              const SizedBox(width: 8),
-              Expanded(
-                  child: Wrap(
-                children: [
-                  const Text('若有問題或回饋都可以寄信到'),
-                  TextButton(
-                      onPressed: () {
-                        _launchMailClient(context);
-                      },
-                      child: const Text(Constants.developerEmail))
-                ],
-              ))
-            ],
-          ),
-          // add version number
-          const Divider(),
-          const Text('版本號碼：${Constants.version}'),
         ],
       ),
     );
