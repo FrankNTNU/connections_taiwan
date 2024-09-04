@@ -46,18 +46,21 @@ class LeaderboardModel {
   // read from Supabase
   static Future<List<LeaderboardModel>> loadData(String? gameTitle) async {
     print('gameTitle: $gameTitle');
+    if (gameTitle == null) {
+      return [];
+    }
     final supabase =
         SupabaseClient(Constants.supabaseUrl, Constants.supabaseKey);
-    final response = await supabase.from('leaderboard').select();
+    final response = await supabase.from('leaderboard').select().eq(
+          'game_title',
+          gameTitle,
+        );
     print('Response: $response');
     List<LeaderboardModel> leaderboard =
         response.map((e) => LeaderboardModel.fromJson(e)).toList();
-    if (gameTitle != null) {
       leaderboard = leaderboard
-          .where((element) => element.gameTitle == gameTitle)
           .toList()
         ..sort((a, b) => a.timeSolved.compareTo(b.timeSolved));
-    }
     print('Leaderboard: $leaderboard');
 
     return leaderboard;

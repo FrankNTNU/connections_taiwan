@@ -1,0 +1,75 @@
+{
+    "difficultyDescriptions": {
+      "easy": "中秋節主題",
+      "normal": "美味的蛋料理",
+      "hard": "星座",
+      "expert": "尖銳的"
+    },
+    "words": [
+      {
+        "word": "茶葉",
+        "difficulty": "normal"
+      },
+      {
+        "word": "太陽",
+        "difficulty": "normal"
+      },
+      {
+        "word": "鐵",
+        "difficulty": "normal"
+      },
+      {
+        "word": "溫泉",
+        "difficulty": "normal"
+      },
+      {
+        "word": "聲音",
+        "difficulty": "expert"
+      },
+      {
+        "word": "水果刀",
+        "difficulty": "expert"
+      },
+      {
+        "word": "評語",
+        "difficulty": "expert"
+      },
+      {
+        "word": "紙張",
+        "difficulty": "expert"
+      },
+      {
+        "word": "獅子",
+        "difficulty": "hard"
+      },
+      {
+        "word": "螃蟹",
+        "difficulty": "hard"
+      },
+      {
+        "word": "瓶子",
+        "difficulty": "hard"
+      },
+      {
+        "word": "秤",
+        "difficulty": "hard"
+      },
+      {
+        "word": "兔子",
+        "difficulty": "easy"
+      },
+      {
+        "word": "烤肉",
+        "difficulty": "easy"
+      },
+      {
+        "word": "柚子",
+        "difficulty": "easy"
+      },
+      {
+        "word": "月亮",
+        "difficulty": "easy"
+      }
+    ]
+  }
+  

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:confetti/confetti.dart';
 import 'package:connections_taiwan/constants.dart';
+import 'package:connections_taiwan/google_signin_button.dart';
 import 'package:connections_taiwan/word_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,8 +28,9 @@ class GameScreenState extends State<GameScreen> {
   List<Difficulty> difficulitiesSolved = [];
   List<DateTime> availableDates = [];
   DateTime? selectedDate;
+  String? customLevel;
   final confettiController =
-      ConfettiController(duration: const Duration(seconds: 10));
+      ConfettiController(duration: const Duration(seconds: 30));
 
   @override
   void initState() {
@@ -130,10 +132,9 @@ class GameScreenState extends State<GameScreen> {
     }
     bool isAllCompleted = words.where((e) => !e.isCompleted).isEmpty;
     if (isAllCompleted) {
-      showSnackBar(context, '恭喜！找到所有有關連性的字。', isError: false);
+      showSnackBar(context, '恭喜！您找到所有關聯組合！', isError: false);
       // confetti
       confettiController.play();
-      // show a dialog asking for username to add to leaderboard or opt out
       openLeaderboardOptInDialog();
     }
   }
@@ -178,6 +179,7 @@ class GameScreenState extends State<GameScreen> {
   }
 
   void resetCompletedAndSelected() {
+    confettiController.stop();
     setState(() {
       words = words.map((e) {
         return e.copyWith(isSelected: false, isCompleted: false);
@@ -192,6 +194,15 @@ class GameScreenState extends State<GameScreen> {
       prefs.setStringList(
         'words',
         words.map((e) => json.encode(e.toJson())).toList(),
+      );
+      // save difficultyMap to Shared Preferences
+      Map<String, String> encodedDifficultyDescriptionMap = {
+        for (var entry in difficultyDescriptionMap.entries)
+          entry.key.name: entry.value
+      };
+      prefs.setString(
+        'difficultyDescriptionMap',
+        json.encode(encodedDifficultyDescriptionMap),
       );
       // save difficulitiesSolved to Shared Preferences
       prefs.setStringList(
@@ -215,6 +226,19 @@ class GameScreenState extends State<GameScreen> {
               wordsJson.map((e) => WordModel.fromJson(json.decode(e))).toList();
         });
       }
+      final String? difficultyDescriptionMapJson =
+          prefs.getString('difficultyDescriptionMap');
+      print('difficultyDescriptionMapJson: $difficultyDescriptionMapJson');
+      if (difficultyDescriptionMapJson != null) {
+        setState(() {
+          difficultyDescriptionMap = (json.decode(difficultyDescriptionMapJson)
+                  as Map<String, dynamic>)
+              .map((key, value) => MapEntry(
+                  Difficulty.values
+                      .firstWhere((element) => element.name == key),
+                  value));
+        });
+      }
       final List<String>? difficulitiesSolvedJson =
           prefs.getStringList('difficulitiesSolved');
       if (difficulitiesSolvedJson != null) {
@@ -234,46 +258,79 @@ class GameScreenState extends State<GameScreen> {
     });
   }
 
+  void changeSelectedDate(DateTime date) {
+    confettiController.stop();
+    setState(() {
+      selectedDate = date;
+    });
+    WordModel.loadData(date).then((value) {
+      if (value == null) {
+        return;
+      }
+      setState(() {
+        words = value.$1;
+        words.shuffle();
+        difficultyDescriptionMap = value.$2;
+        difficulitiesSolved = [];
+      });
+      saveWordsToSharedPreferences();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isAllCompleted = words.where((e) => !e.isCompleted).isEmpty;
     return Scaffold(
       appBar: AppBar(
+        leading: // logo
+            InkWell(
+          onTap: () {
+            // open a dialog
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: const Text('關於關連－臺灣版'),
+                  content: const AboutContent(),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('關閉'),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+          child: Wrap(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Image.asset('assets/icon/connections.webp'),
+              ),
+            ],
+          ),
+        ),
         title: Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            InkWell(
-              child: const Text('關聯－臺灣版'),
-              onTap: () {
-                // open a dialog
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: const Text('關於關連－臺灣版'),
-                      content: const AboutContent(),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text('關閉'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
+            const Text('關聯臺灣版'),
+            const SizedBox(
+              width: 8,
             ),
             // a date picker to select date
-            InkWell(
-              onTap: () {
+            OutlinedButton(
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(Colors.white),
+              ),
+              onPressed: () {
                 showDatePicker(
                   context: context,
                   initialDate: selectedDate ?? DateTime.now(),
                   firstDate: availableDates.first,
                   lastDate: availableDates.last,
-
                   // show only available dates
                   selectableDayPredicate: (DateTime date) {
                     return availableDates.contains(date);
@@ -284,174 +341,155 @@ class GameScreenState extends State<GameScreen> {
                   // change 'SELECT DATE' to '選擇日期'
                   helpText: '選擇日期',
                 ).then((value) {
-                  if (value != null) {
-                    setState(() {
-                      selectedDate = value;
-                    });
-                    WordModel.loadData(value).then((value) {
-                      if (value == null) {
-                        return;
-                      }
-                      setState(() {
-                        words = value.$1;
-                        words.shuffle();
-                        difficultyDescriptionMap = value.$2;
-                        difficulitiesSolved = [];
-                      });
-                      saveWordsToSharedPreferences();
-                      // stop confetti
-                      confettiController.stop();
-                    });
+                  print('value: $value');
+                  if (value == null) {
+                    return;
                   }
+                  changeSelectedDate(value);
                 });
               },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  selectedDate == null
-                      ? '選擇日期'
-                      : '${selectedDate!.year}/${selectedDate!.month.toString().padLeft(2, '0')}/${selectedDate!.day.toString().padLeft(2, '0')}',
-                  style: const TextStyle(fontSize: 16, color: Colors.white),
-                ),
+              child: Text(
+                selectedDate == null
+                    ? '選擇日期'
+                    : '${selectedDate!.year}/${selectedDate!.month.toString().padLeft(2, '0')}/${selectedDate!.day.toString().padLeft(2, '0')}',
               ),
             ),
-            // leaderboard icon button
-            LeaderboardIconButton(selectedDate: selectedDate),
           ],
         ),
         actions: [
-          if (words.isNotEmpty)
-            IconButton(
-              onPressed: () {
-                // confirm if reset
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: const Text('確定要重新開始嗎？'),
-                      content: const Text('所有已選擇的字將會被清除。'),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text('取消'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            resetCompletedAndSelected();
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text('確定'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-              icon: const Icon(Icons.restart_alt),
-            ),
+          // leaderboard icon button
+          LeaderboardIconButton(selectedDate: selectedDate),
         ],
       ),
       body: words.isEmpty
           ? const Center(child: Text('還沒有資料，請稍後再試。'))
           : Stack(
               children: [
-                SingleChildScrollView(
-                  child: Center(
-                    child: Container(
-                      constraints:
-                          const BoxConstraints(maxWidth: 800, minWidth: 400),
+                InteractiveViewer(
+                  child: LayoutBuilder(builder: (context, constraints) {
+                    return Center(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const SizedBox(height: 16),
-                          // Title
-                          Text(
-                            isAllCompleted ? '恭喜你找到所有關聯!' : '選擇四個有關連性的字按下提交',
-                            style: const TextStyle(fontSize: 25),
-                          ),
-                          const SizedBox(height: 16),
-                          // Completed words
-                          if (words.where((e) => e.isCompleted).isNotEmpty)
-                            CompletedWords(
-                                difficulitiesSolved: difficulitiesSolved,
-                                words: words,
-                                difficultyDescriptionMap:
-                                    difficultyDescriptionMap),
-                          const SizedBox(height: 8),
-                          // Uncompleted words
-                          SizedBox(
-                            width: double.infinity,
-                            child: Wrap(
-                              spacing: Constants
-                                  .cardHorizontalSpacing, // Spacing between items
-                              runSpacing: 8, // Spacing between lines
-                              alignment: WrapAlignment
-                                  .center, // Center items horizontally
-                              children: [
-                                for (var word
-                                    in words.where((e) => !e.isCompleted))
-                                  WordCard(
-                                    word: word.word,
-                                    isSelected: word.isSelected,
-                                    onTap: () => wordCardOnTap(word.word),
-                                  )
-                              ],
+                          Expanded(
+                            child: Container(
+                              width: double.infinity,
+                              constraints: const BoxConstraints(maxWidth: 800),
+                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    const SizedBox(height: 16),
+                                    // Title
+                                    Text(
+                                      isAllCompleted
+                                          ? '恭喜您找到所有關聯！'
+                                          : '選擇四個有關連性的字按下提交',
+                                      style: const TextStyle(fontSize: 25),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    // Completed words
+                                    if (words.where((e) => e.isCompleted).isNotEmpty)
+                                      CompletedWords(
+                                          difficulitiesSolved: difficulitiesSolved,
+                                          words: words,
+                                          difficultyDescriptionMap:
+                                              difficultyDescriptionMap),
+                                    const SizedBox(height: 8),
+                                    // Uncompleted words
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: Wrap(
+                                        spacing: Constants
+                                            .cardHorizontalSpacing, // Spacing between items
+                                        runSpacing: 8, // Spacing between lines
+                                        alignment: WrapAlignment
+                                            .center, // Center items horizontally
+                                        children: [
+                                          for (var word
+                                              in words.where((e) => !e.isCompleted))
+                                            WordCard(
+                                              word: word.word,
+                                              isSelected: word.isSelected,
+                                              onTap: () => wordCardOnTap(word.word),
+                                            )
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    // Button group
+                                    Wrap(
+                                      spacing: 8,
+                                      alignment: WrapAlignment.center,
+                                      children: [
+                                        if (isAllCompleted)
+                                          OutlinedButton(
+                                            onPressed: resetCompletedAndSelected,
+                                            child: const Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              child: Text('重新開始',
+                                                  style: TextStyle(fontSize: 16)),
+                                            ),
+                                          ),
+                                        if (!isAllCompleted)
+                                          OutlinedButton(
+                                            onPressed: deSelectAll,
+                                            child: const Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              child: Text('清除選擇',
+                                                  style: TextStyle(fontSize: 16)),
+                                            ),
+                                          ),
+                                        if (!isAllCompleted)
+                                          OutlinedButton(
+                                            onPressed: shuffleWords,
+                                            child: const Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              child: Text('洗牌',
+                                                  style: TextStyle(fontSize: 16)),
+                                            ),
+                                          ),
+                                        if (!isAllCompleted)
+                                          ElevatedButton(
+                                            onPressed: checkAnswers,
+                                            child: const Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              child: Text(
+                                                '提交',
+                                                style: TextStyle(fontSize: 16),
+                                              ),
+                                            ),
+                                          ),
+                                        if (isAllCompleted && false)
+                                          ElevatedButton(
+                                            // amber
+                                            style: ButtonStyle(
+                                              backgroundColor:
+                                                  WidgetStateProperty.all(
+                                                      Colors.amber),
+                                            ),
+                                            onPressed: openLeaderboardOptInDialog,
+                                            child: const Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              child: Text('參加排行榜',
+                                                  style: TextStyle(fontSize: 16)),
+                                            ),
+                                          ),
+                                        //const GoogleSigninButton()
+                                      ],
+                                    ),
+                                    const SizedBox(
+                                      height: 32,
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          // Button group
-                          Wrap(
-                            spacing: 8,
-                            alignment: WrapAlignment.center,
-                            children: [
-                              if (isAllCompleted)
-                                OutlinedButton(
-                                  onPressed: resetCompletedAndSelected,
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text('重新開始',
-                                        style: TextStyle(fontSize: 16)),
-                                  ),
-                                ),
-                              if (!isAllCompleted)
-                                OutlinedButton(
-                                  onPressed: deSelectAll,
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text('清除選擇',
-                                        style: TextStyle(fontSize: 16)),
-                                  ),
-                                ),
-                              if (!isAllCompleted)
-                                OutlinedButton(
-                                  onPressed: shuffleWords,
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text('洗牌',
-                                        style: TextStyle(fontSize: 16)),
-                                  ),
-                                ),
-                              if (!isAllCompleted)
-                                ElevatedButton(
-                                  onPressed: checkAnswers,
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text('提交',
-                                        style: TextStyle(fontSize: 16)),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          const SizedBox(height: 16),
                         ],
                       ),
-                    ),
-                  ),
+                    );
+                  }),
                 ),
                 Center(
                   child: ConfettiWidget(
