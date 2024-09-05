@@ -30,36 +30,70 @@ class GameScreenState extends State<GameScreen> {
   List<Difficulty> difficulitiesSolved = [];
   List<DateTime> availableDates = [];
   DateTime? selectedDate;
-  String? customLevel;
+  DateTime? customLevelDate;
   final confettiController =
       ConfettiController(duration: const Duration(seconds: 30));
 
   @override
   void initState() {
     super.initState();
-    print('Url [GameScreen]: ${Uri.base}');
-    Future.delayed(Duration.zero, () async {
-      if (Uri.base.toString().contains('privacy')) {
+
+    // reading from url params
+    Future.delayed(Duration.zero, () {
+      print(
+          'Url [GameScreen]: base: ${Uri.base} param: ${Uri.base.queryParameters}');
+      final customLevel = Uri.base.queryParameters['customLevel'];
+      print('customLevel: $customLevel');
+      // full url: http://localhost:49764/?page=privacy&customLevel=2024-09-02
+      customLevelDate = DateTime.tryParse(customLevel ?? '');
+      bool isPrivacyInParam = Uri.base.toString().contains('privacy');
+      if (isPrivacyInParam) {
         setState(() {
-          html.window.history.pushState(null, '關聯_臺灣版', '/');
           Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => const PrivacyScreen()));
         });
       }
-    });
-    if (!mounted) return;
-    getAllFileDates().then((_) {
-      WordModel.loadData(selectedDate).then((value) {
-        if (value == null) {
-          return;
-        }
+      if (customLevelDate != null) {
+        setState(() {
+          selectedDate = customLevelDate;
+        });
+        // clear url param
+        html.window.history.pushState({}, '', '/');
+        return saveSelectedDateToSharedPreferences();
+      }
+      // return future void
+      return Future.value(null);
+    })
+        .then((_) => getAllFileDates())
+        .then((_) => SharedPreferences.getInstance())
+        .then((prefs) {
+      // load available dates
+      // set selected date
+      final String? selectedDateJson = prefs.getString('selectedDate');
+      // priority: customLevelDate > cached date > last date in availableDates
+      selectedDate = // if there is today's date, select it, otherwise select the last date
+          // check year, month, day
+          customLevelDate ??
+              DateTime.tryParse(selectedDateJson ?? '') ??
+              (availableDates.contains(DateTime(DateTime.now().year,
+                      DateTime.now().month, DateTime.now().day))
+                  ? DateTime.now()
+                  : availableDates.last);
+      // load data from json file based on selected date
+      return WordModel.loadData(selectedDate);
+    }).then((value) {
+      if (value != null) {
         setState(() {
           words = value.$1;
           words.shuffle();
           difficultyDescriptionMap = value.$2;
         });
-        syncWordsFromSharedPreferences();
-      });
+      }
+      // if there is a forced level in url then dont load from cache
+      if (customLevelDate == null) {
+        // (override file data above) load words and difficulties solved from cahced data
+        loadWordsFromSharedPreferences();
+      }
     });
   }
 
@@ -73,12 +107,6 @@ class GameScreenState extends State<GameScreen> {
     print('fileNames: $fileNames');
     setState(() {
       availableDates = fileNames.map((e) => DateTime.parse(e)).toList();
-      selectedDate = // if there is today's date, select it, otherwise select the last date
-          // check year, month, day
-          availableDates.contains(DateTime(DateTime.now().year,
-                  DateTime.now().month, DateTime.now().day))
-              ? DateTime.now()
-              : availableDates.last;
     });
   }
 
@@ -222,15 +250,15 @@ class GameScreenState extends State<GameScreen> {
         'difficulitiesSolved',
         difficulitiesSolved.map((e) => e.name).toList(),
       );
-      // save selectedDate to Shared Preferences
-      prefs.setString(
-        'selectedDate',
-        selectedDate.toString(),
-      );
     });
   }
 
-  void syncWordsFromSharedPreferences() {
+  Future<void> saveSelectedDateToSharedPreferences() async {
+    var prefs = await SharedPreferences.getInstance();
+    prefs.setString('selectedDate', selectedDate.toString());
+  }
+
+  void loadWordsFromSharedPreferences() {
     SharedPreferences.getInstance().then((prefs) {
       final List<String>? wordsJson = prefs.getStringList('words');
       if (wordsJson != null) {
@@ -261,20 +289,15 @@ class GameScreenState extends State<GameScreen> {
               .toList();
         });
       }
-      final String? selectedDateJson = prefs.getString('selectedDate');
-      if (selectedDateJson != null) {
-        setState(() {
-          selectedDate = DateTime.parse(selectedDateJson);
-        });
-      }
     });
   }
 
-  void changeSelectedDate(DateTime date) {
+  void changeSelectedDate(DateTime date) async {
     confettiController.stop();
     setState(() {
       selectedDate = date;
     });
+    await saveSelectedDateToSharedPreferences();
     WordModel.loadData(date).then((value) {
       if (value == null) {
         return;
@@ -354,10 +377,34 @@ class GameScreenState extends State<GameScreen> {
                   helpText: '選擇日期',
                 ).then((value) {
                   print('value: $value');
-                  if (value == null) {
+                  if (value == null || !context.mounted) {
                     return;
                   }
-                  changeSelectedDate(value);
+                  String yyyyMMdd = '${value.year}/${value.month}/${value.day}';
+                  // confirm to change date
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('確認'),
+                          content: Text('確定要切換到日期 $yyyyMMdd 嗎？您目前的進度將會被清除。'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('取消'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                changeSelectedDate(value);
+                              },
+                              child: const Text('確定'),
+                            ),
+                          ],
+                        );
+                      });
                 });
               },
               child: Text(

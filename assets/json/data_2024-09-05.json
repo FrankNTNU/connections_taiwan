@@ -1,0 +1,75 @@
+{
+    "difficultyDescriptions": {
+      "easy": "重點的同義詞",
+      "normal": "連覽器的選單",
+      "hard": "有可能會過期",
+      "expert": "有彈性"
+    },
+    "words": [
+      {
+        "word": "核心",
+        "difficulty": "easy"
+      },
+      {
+        "word": "首要",
+        "difficulty": "easy"
+      },
+      {
+        "word": "主軸",
+        "difficulty": "easy"
+      },
+      {
+        "word": "聚焦",
+        "difficulty": "easy"
+      },
+      {
+        "word": "書籤",
+        "difficulty": "normal"
+      },
+      {
+        "word": "歷史",
+        "difficulty": "normal"
+      },
+      {
+        "word": "下載",
+        "difficulty": "normal"
+      },
+      {
+        "word": "擴充",
+        "difficulty": "normal"
+      },
+      {
+        "word": "護照",
+        "difficulty": "hard"
+      },
+      {
+        "word": "牛奶",
+        "difficulty": "hard"
+      },
+      {
+        "word": "折價券",
+        "difficulty": "hard"
+      },
+      {
+        "word": "保固",
+        "difficulty": "hard"
+      },
+      {
+        "word": "橡皮筋",
+        "difficulty": "expert"
+      },
+      {
+        "word": "時間",
+        "difficulty": "expert"
+      },
+      {
+        "word": "預算",
+        "difficulty": "expert"
+      },
+      {
+        "word": "跳高選手", 
+        "difficulty": "expert"
+      }
+    ]
+  }
+  
