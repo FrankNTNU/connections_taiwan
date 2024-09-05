@@ -29,10 +29,13 @@ class PrivacyScreen extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const Text('關聯臺灣版隱私政策', style: TextStyle(fontSize: 16),),
+                const SizedBox(height: 8),
                 const Text(
-                    '關聯臺灣版不會收集任何個人資料，也不會使用任何 Cookie。關聯臺灣版是為了提供一個有趣的遊戲體驗，並且不會有任何廣告。\n若您有任何問題或回饋，請寄信到開發者信箱。'),
+                    '關聯臺灣版致力於保護您的隱私。我們不會收集任何敏感的個人資料，亦不使用任何 Cookie。您的個人資料將不會被分享或提供給任何第三方。關聯臺灣版旨在為玩家提供純粹的遊戲體驗，不包含任何形式的廣告。'),
+                    const SizedBox(height: 8),
+                    const Text('若您對本遊戲有任何問題、建議或回饋，歡迎隨時聯繫開發者，我們將竭誠為您服務。請將您的信件寄至開發者信箱。'),
                 TextButton(
                     onPressed: () {
                       _launchMailClient(context);

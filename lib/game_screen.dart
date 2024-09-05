@@ -4,6 +4,7 @@ import 'dart:html' as html;
 
 import 'package:confetti/confetti.dart';
 import 'package:connections_taiwan/constants.dart';
+import 'package:connections_taiwan/google_signin_button.dart';
 import 'package:connections_taiwan/word_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -52,6 +53,10 @@ class GameScreenState extends State<GameScreen> {
           Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => const PrivacyScreen()));
         });
+      }
+      bool isAboutInParam = Uri.base.toString().contains('about');
+      if (isAboutInParam) {
+        openAboutDialog();
       }
       if (customLevelDate != null) {
         setState(() {
@@ -312,6 +317,26 @@ class GameScreenState extends State<GameScreen> {
     });
   }
 
+  void openAboutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('關於關連－臺灣版'),
+          content: const AboutContent(),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('關閉'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isAllCompleted = words.where((e) => !e.isCompleted).isEmpty;
@@ -319,26 +344,7 @@ class GameScreenState extends State<GameScreen> {
       appBar: AppBar(
         leading: // logo
             InkWell(
-          onTap: () {
-            // open a dialog
-            showDialog(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  title: const Text('關於關連－臺灣版'),
-                  content: const AboutContent(),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('關閉'),
-                    ),
-                  ],
-                );
-              },
-            );
-          },
+          onTap: () => openAboutDialog(),
           child: Wrap(
             children: [
               Padding(
@@ -429,6 +435,7 @@ class GameScreenState extends State<GameScreen> {
                     return Center(
                       child: Column(
                         children: [
+                          const GoogleSigninButton(),
                           Expanded(
                             child: Container(
                               width: double.infinity,
@@ -528,7 +535,7 @@ class GameScreenState extends State<GameScreen> {
                                               ),
                                             ),
                                           ),
-                                        if (isAllCompleted && false)
+                                        if (isAllCompleted)
                                           ElevatedButton(
                                             // amber
                                             style: ButtonStyle(

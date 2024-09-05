@@ -30,6 +30,7 @@ class _GoogleSigninButtonState extends State<GoogleSigninButton> {
           provider: OAuthProvider.google,
           idToken: googleAuth.idToken ?? '',
         );
+        print('Response: $response');
         if (response.user != null) {
           showSnackBar(context, '登入成功！');
         } else {
