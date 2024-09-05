@@ -58,9 +58,8 @@ class LeaderboardModel {
     print('Response: $response');
     List<LeaderboardModel> leaderboard =
         response.map((e) => LeaderboardModel.fromJson(e)).toList();
-      leaderboard = leaderboard
-          .toList()
-        ..sort((a, b) => a.timeSolved.compareTo(b.timeSolved));
+    leaderboard = leaderboard.toList()
+      ..sort((a, b) => a.timeSolved.compareTo(b.timeSolved));
     print('Leaderboard: $leaderboard');
 
     return leaderboard;
