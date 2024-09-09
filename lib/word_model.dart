@@ -53,37 +53,38 @@ class WordModel {
     );
   }
 
+  // read file data
   static Future<(List<WordModel>, Map<Difficulty, String>)?> loadData(
       DateTime? dateTime) async {
-    // date in yyyy-mm-dd format
     final String dateString =
         (dateTime ?? DateTime.now()).toString().split(' ')[0];
     print('dateString: $dateString');
     final fileName = 'assets/json/data_$dateString.json';
-    // check if file exists
-    final bool fileExists = await rootBundle
-        .loadString(fileName)
-        .then((_) => true)
-        .catchError((_) => false);
-    if (!fileExists) {
+
+    try {
+      // Call loadString once and store the result
+      String jsonString = await rootBundle.loadString(fileName, cache: false);
+
+      Map<String, dynamic> jsonData = jsonDecode(jsonString);
+
+      // Load difficulty descriptions
+      final Map<Difficulty, String> difficultyDescriptionMap = {};
+      (jsonData['difficultyDescriptions'] as Map<String, dynamic>)
+          .forEach((key, value) {
+        difficultyDescriptionMap[
+            Difficulty.values.firstWhere((e) => e.name == key)] = value;
+      });
+
+      // Load words list
+      List<WordModel> words = (jsonData['words'] as List)
+          .map((wordJson) => WordModel.fromJson(wordJson))
+          .toList();
+
+      return (words, difficultyDescriptionMap);
+    } catch (e) {
+      // If the file doesn't exist or there is an error, return null
+      print('Error: $e');
       return null;
     }
-    String jsonString =
-        await rootBundle.loadString('assets/json/data_$dateString.json');
-    Map<String, dynamic> jsonData = jsonDecode(jsonString);
-    // Load difficulty descriptions
-    final Map<Difficulty, String> difficultyDescriptionMap = {};
-    (jsonData['difficultyDescriptions'] as Map<String, dynamic>)
-        .forEach((key, value) {
-      difficultyDescriptionMap[
-          Difficulty.values.firstWhere((e) => e.name == key)] = value;
-    });
-
-    // Load words list
-    List<WordModel> words = (jsonData['words'] as List)
-        .map((wordJson) => WordModel.fromJson(wordJson))
-        .toList();
-
-    return (words, difficultyDescriptionMap);
   }
 }

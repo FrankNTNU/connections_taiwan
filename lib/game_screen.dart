@@ -1,15 +1,15 @@
 import 'dart:convert';
-// html
-import 'dart:html' as html;
-
+import 'package:universal_html/html.dart' as html;
 import 'package:confetti/confetti.dart';
 import 'package:connections_taiwan/constants.dart';
+import 'package:connections_taiwan/google_signin_button.dart';
 import 'package:connections_taiwan/word_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'about_content.dart';
+import 'action_button.dart';
 import 'completed_words.dart';
 import 'leaderboard_icon_button.dart';
 import 'privacy_screen.dart';
@@ -53,14 +53,21 @@ class GameScreenState extends State<GameScreen> {
               MaterialPageRoute(builder: (context) => const PrivacyScreen()));
         });
       }
+      bool isAboutInParam = Uri.base.toString().contains('about');
+      if (isAboutInParam) {
+        openAboutDialog();
+      }
+
       if (customLevelDate != null) {
         setState(() {
           selectedDate = customLevelDate;
         });
-        // clear url param
-        html.window.history.pushState({}, '', '/');
+
         return saveSelectedDateToSharedPreferences();
       }
+      // clear url param with universal html
+      html.window.history.pushState({}, '', '/');
+      
       // return future void
       return Future.value(null);
     })
@@ -312,6 +319,26 @@ class GameScreenState extends State<GameScreen> {
     });
   }
 
+  void openAboutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('關於關連－臺灣版'),
+          content: const AboutContent(),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('關閉'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isAllCompleted = words.where((e) => !e.isCompleted).isEmpty;
@@ -319,26 +346,7 @@ class GameScreenState extends State<GameScreen> {
       appBar: AppBar(
         leading: // logo
             InkWell(
-          onTap: () {
-            // open a dialog
-            showDialog(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  title: const Text('關於關連－臺灣版'),
-                  content: const AboutContent(),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('關閉'),
-                    ),
-                  ],
-                );
-              },
-            );
-          },
+          onTap: () => openAboutDialog(),
           child: Wrap(
             children: [
               Padding(
@@ -429,6 +437,7 @@ class GameScreenState extends State<GameScreen> {
                     return Center(
                       child: Column(
                         children: [
+                          //const GoogleSigninButton(),
                           Expanded(
                             child: Container(
                               width: double.infinity,
@@ -487,63 +496,40 @@ class GameScreenState extends State<GameScreen> {
                                       alignment: WrapAlignment.center,
                                       children: [
                                         if (isAllCompleted)
-                                          OutlinedButton(
+                                          ActionButton(
+                                            text: '重新開始',
                                             onPressed:
                                                 resetCompletedAndSelected,
-                                            child: const Padding(
-                                              padding: EdgeInsets.all(8.0),
-                                              child: Text('重新開始',
-                                                  style:
-                                                      TextStyle(fontSize: 16)),
-                                            ),
+                                            isPrimary: false,
                                           ),
+
                                         if (!isAllCompleted)
-                                          OutlinedButton(
+                                          ActionButton(
+                                            text: '清除選擇',
                                             onPressed: deSelectAll,
-                                            child: const Padding(
-                                              padding: EdgeInsets.all(8.0),
-                                              child: Text('清除選擇',
-                                                  style:
-                                                      TextStyle(fontSize: 16)),
-                                            ),
+                                            isPrimary: false,
                                           ),
+
                                         if (!isAllCompleted)
-                                          OutlinedButton(
+                                          ActionButton(
+                                            text: '洗牌',
                                             onPressed: shuffleWords,
-                                            child: const Padding(
-                                              padding: EdgeInsets.all(8.0),
-                                              child: Text('洗牌',
-                                                  style:
-                                                      TextStyle(fontSize: 16)),
-                                            ),
+                                            isPrimary: false,
                                           ),
+
                                         if (!isAllCompleted)
-                                          ElevatedButton(
+                                          ActionButton(
+                                            text: '提交',
                                             onPressed: checkAnswers,
-                                            child: const Padding(
-                                              padding: EdgeInsets.all(8.0),
-                                              child: Text(
-                                                '提交',
-                                                style: TextStyle(fontSize: 16),
-                                              ),
-                                            ),
                                           ),
-                                        if (isAllCompleted && false)
-                                          ElevatedButton(
-                                            // amber
-                                            style: ButtonStyle(
-                                              backgroundColor:
-                                                  WidgetStateProperty.all(
-                                                      Colors.amber),
-                                            ),
+
+                                        if (isAllCompleted)
+                                          ActionButton(
+                                            foreColor: Colors.black,
+                                            backColor: Colors.amber,
+                                            text: '參加排行榜',
                                             onPressed:
                                                 openLeaderboardOptInDialog,
-                                            child: const Padding(
-                                              padding: EdgeInsets.all(8.0),
-                                              child: Text('參加排行榜',
-                                                  style:
-                                                      TextStyle(fontSize: 16)),
-                                            ),
                                           ),
                                         //const GoogleSigninButton()
                                       ],
