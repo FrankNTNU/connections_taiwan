@@ -1,0 +1,75 @@
+{
+    "difficultyDescriptions": {
+      "easy": "事件",
+      "normal": "韓劇的常見元素",
+      "hard": "郵箱裡面有",
+      "expert": "越來越高"
+    },
+    "words": [
+      {
+        "word": "情形",
+        "difficulty": "easy"
+      },
+      {
+        "word": "現象",
+        "difficulty": "easy"
+      },
+      {
+        "word": "變故",
+        "difficulty": "easy"
+      },
+      {
+        "word": "狀況",
+        "difficulty": "easy"
+      },
+      {
+        "word": "三角戀",
+        "difficulty": "normal"
+      },
+      {
+        "word": "車禍",
+        "difficulty": "normal"
+      },
+      {
+        "word": "失憶症",
+        "difficulty": "normal"
+      },
+      {
+        "word": "破產",
+        "difficulty": "normal"
+      },
+      {
+        "word": "帳單",
+        "difficulty": "hard"
+      },
+      {
+        "word": "卡片",
+        "difficulty": "hard"
+      },
+      {
+        "word": "信",
+        "difficulty": "hard"
+      },
+      {
+        "word": "廣告",
+        "difficulty": "hard"
+      },
+      {
+        "word": "海平面",
+        "difficulty": "expert"
+      },
+      {
+        "word": "房價",
+        "difficulty": "expert"
+      },
+      {
+        "word": "全球氣溫",
+        "difficulty": "expert"
+      },
+      {
+        "word": "髮線", 
+        "difficulty": "expert"
+      }
+    ]
+  }
+  
