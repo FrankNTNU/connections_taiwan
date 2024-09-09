@@ -41,3 +41,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# ignore the .firebase directory
+.firebase/
+.firebase/connections-taiwan/hosting/flutter_bootstrap.js
