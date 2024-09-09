@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:universal_html/html.dart' as html;
 import 'package:confetti/confetti.dart';
 import 'package:connections_taiwan/constants.dart';
-import 'package:connections_taiwan/google_signin_button.dart';
 import 'package:connections_taiwan/word_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
